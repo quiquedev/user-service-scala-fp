@@ -10,23 +10,11 @@ import doobie.util.Put
 import cats.data.Validated._
 
 object UserUsecasesDomain {
-  type ValidationResult = Validated[NonEmptyList[String], Unit]
-  type ValidationResults = NonEmptyList[ValidationResult]
-
-  private val FirstNameMaxLength = 500
-  private val LastNameMaxLength = 500
-  private val EmailMaxLength = 500
-  private val PhoneNumberMaxLength = 500
+  import DomainValidation._
 
   sealed trait UserUsecasesError extends RuntimeException
-  final case class FirstNameValidationError(
-      firstName: FirstName,
-      error: String
-  ) extends UserUsecasesError
-  final case class LastNameValidationError(
-      lastName: LastName,
-      error: String
-  ) extends UserUsecasesError
+  final case class UserValidationError(user: User, errors: NonEmptyList[String])
+      extends UserUsecasesError
   final case class EmailValidationError(
       email: Email,
       errors: NonEmptyList[String]
@@ -35,8 +23,6 @@ object UserUsecasesDomain {
       phoneNumber: PhoneNumber,
       errors: NonEmptyList[String]
   ) extends UserUsecasesError
-  final case class UserValidationError(user: User, errors: NonEmptyList[String])
-      extends UserUsecasesError
 
   final case class UserId(value: Int) extends AnyVal
   object UserId {
@@ -59,51 +45,23 @@ object UserUsecasesDomain {
   }
 
   final case class FirstName(value: String) extends AnyVal
-  private object FirstName {
+  object FirstName {
     implicit val firstNameGet: Get[FirstName] = Get[String].map(FirstName(_))
     implicit val firstNamePut: Put[FirstName] = Put[String].contramap(_.value)
-
-    def validate(value: FirstName): ValidationResults =
-      Validated
-        .condNel(
-          value.value.nonNullOrEmpty && value.value.length <= FirstNameMaxLength,
-          (),
-          s"firstName must be a non empty string with a max length of $FirstNameMaxLength"
-        )
-        .pure[NonEmptyList]
   }
   final case class LastName(value: String) extends AnyVal
 
-  private object LastName {
+  object LastName {
     implicit val lastNameGet: Get[LastName] = Get[String].map(LastName(_))
     implicit val lastNamePut: Put[LastName] = Put[String].contramap(_.value)
 
-    def validate(value: LastName): ValidationResults =
-      Validated
-        .condNel(
-          value.value.nonNullOrEmpty && value.value.length <= LastNameMaxLength,
-          (),
-          s"lastName must be a non empty string with a max length of $LastNameMaxLength"
-        )
-        .pure[NonEmptyList]
   }
 
   final case class Email(id: EmailId, value: String)
   object Email {
     implicit final class EmailExtensions(val value: Email) extends AnyVal {
-      def validate: ValidationResults =
-        NonEmptyList.of(
-          Validated
-            .condNel(Option(value.id).isDefined, (), "email id cannot be null"),
-          Validated.condNel(
-            value.value.nonNullOrEmpty && value.value.length <= EmailMaxLength,
-            (),
-            s"email must be a non empty string with max length of $EmailMaxLength"
-          )
-        )
-
       def validateF[F[_]](implicit S: Sync[F]): F[Unit] = {
-        validate.combineAll match {
+        validateEmail(value).combineAll match {
           case Valid(_) => S.unit
           case Invalid(errors) =>
             S.raiseError(EmailValidationError(value, errors))
@@ -116,22 +74,8 @@ object UserUsecasesDomain {
   object PhoneNumber {
     implicit final class PhoneNumberExtensions(val value: PhoneNumber)
         extends AnyVal {
-      def validate: ValidationResults =
-        NonEmptyList.of(
-          Validated.condNel(
-            Option(value.id).isDefined,
-            (),
-            "phone number id cannot be null"
-          ),
-          Validated.condNel(
-            value.value.nonNullOrEmpty && value.value.length <= PhoneNumberMaxLength,
-            (),
-            s"phone number must be a non empty string with a max length of $PhoneNumberMaxLength"
-          )
-        )
-
       def validateF[F[_]](implicit S: Sync[F]): F[Unit] = {
-        validate.combineAll match {
+        validatePhoneNumber(value).combineAll match {
           case Valid(_) => S.unit
           case Invalid(errors) =>
             S.raiseError(PhoneNumberValidationError(value, errors))
@@ -150,61 +94,120 @@ object UserUsecasesDomain {
 
   object User {
     implicit final class UserExtensions(val value: User) extends AnyVal {
-      private def validateNullFields[F[_]](implicit S: Sync[F]): F[Unit] = {
-        def validateField[A](
-            value: A,
-            name: String
-        ): ValidationResult =
-          Validated.condNel(
-            Option(value).isDefined,
-            (),
-            s"$name cannot be null"
-          )
 
-        val validatedNel: ValidationResults = NonEmptyList.of(
-          validateField(value.id, "id"),
-          validateField(value.firstName, "firstName"),
-          validateField(value.lastName, "lastName"),
-          validateField(value.emails, "emails"),
-          validateField(value.phoneNumbers, "phoneNumbers")
-        )
-
-        validatedNel.combineAll match {
-          case Valid(_) => S.unit
-          case Invalid(errors) =>
-            S.raiseError(UserValidationError(value, errors))
-        }
-      }
-
-      private def validateFieldContents[F[_]](implicit S: Sync[F]): F[Unit] = {
-        def validateListField[A](
-            field: Option[NonEmptyList[A]]
-        )(validation: A => ValidationResults): ValidationResults =
-          field match {
-            case None => ().validNel.pure[NonEmptyList]
-            case Some(content) =>
-              content.flatMap(validation)
-          }
-
-        val firstNameValidationResults = FirstName.validate(value.firstName)
-        val lastNameValidationResults = LastName.validate(value.lastName)
-        val emailsValidationResults =
-          validateListField(value.emails)(_.validate)
-        val phoneNumbersValidationResults =
-          validateListField(value.phoneNumbers)(_.validate)
-
-        (firstNameValidationResults ::: lastNameValidationResults ::: emailsValidationResults ::: phoneNumbersValidationResults).combineAll match {
-          case Valid(_) => S.unit
-          case Invalid(errors) =>
-            S.raiseError(UserValidationError(value, errors))
-        }
-      }
-
-      def validate[F[_]](implicit S: Sync[F]): F[Unit] =
+      def validateF[F[_]](implicit S: Sync[F]): F[Unit] =
         for {
-          _ <- validateNullFields
-          _ <- validateFieldContents
+          _ <- validateUserNullFieldsF(value)
+          _ <- validateUserFieldContentsF(value)
         } yield ()
     }
+  }
+
+  private object DomainValidation {
+    private val FirstNameMaxLength = 500
+    private val LastNameMaxLength = 500
+    private val EmailMaxLength = 500
+    private val PhoneNumberMaxLength = 500
+
+    type ValidationResult = Validated[NonEmptyList[String], Unit]
+    type ValidationResults = NonEmptyList[ValidationResult]
+
+    def validateFirstName(value: FirstName): ValidationResults =
+      Validated
+        .condNel(
+          value.value.nonNullOrEmpty && value.value.length <= FirstNameMaxLength,
+          (),
+          s"firstName must be a non empty string with a max length of $FirstNameMaxLength"
+        )
+        .pure[NonEmptyList]
+
+    def validateLastName(value: LastName): ValidationResults =
+      Validated
+        .condNel(
+          value.value.nonNullOrEmpty && value.value.length <= LastNameMaxLength,
+          (),
+          s"lastName must be a non empty string with a max length of $LastNameMaxLength"
+        )
+        .pure[NonEmptyList]
+
+    def validateEmail(value: Email): ValidationResults =
+      NonEmptyList.of(
+        Validated
+          .condNel(Option(value.id).isDefined, (), "email id cannot be null"),
+        Validated.condNel(
+          value.value.nonNullOrEmpty && value.value.length <= EmailMaxLength,
+          (),
+          s"email must be a non empty string with max length of $EmailMaxLength"
+        )
+      )
+
+    def validatePhoneNumber(value: PhoneNumber): ValidationResults =
+      NonEmptyList.of(
+        Validated.condNel(
+          Option(value.id).isDefined,
+          (),
+          "phone number id cannot be null"
+        ),
+        Validated.condNel(
+          value.value.nonNullOrEmpty && value.value.length <= PhoneNumberMaxLength,
+          (),
+          s"phone number must be a non empty string with a max length of $PhoneNumberMaxLength"
+        )
+      )
+
+    def validateUserNullFieldsF[F[_]](
+        value: User
+    )(implicit S: Sync[F]): F[Unit] = {
+      def validateField[A](
+          value: A,
+          name: String
+      ): ValidationResult =
+        Validated.condNel(
+          Option(value).isDefined,
+          (),
+          s"$name cannot be null"
+        )
+
+      val validatedNel: ValidationResults = NonEmptyList.of(
+        validateField(value.id, "id"),
+        validateField(value.firstName, "firstName"),
+        validateField(value.lastName, "lastName"),
+        validateField(value.emails, "emails"),
+        validateField(value.phoneNumbers, "phoneNumbers")
+      )
+
+      validatedNel.combineAll match {
+        case Valid(_) => S.unit
+        case Invalid(errors) =>
+          S.raiseError(UserValidationError(value, errors))
+      }
+    }
+
+    def validateUserFieldContentsF[F[_]](
+        value: User
+    )(implicit S: Sync[F]): F[Unit] = {
+      def validateListField[A](
+          field: Option[NonEmptyList[A]]
+      )(validation: A => ValidationResults): ValidationResults =
+        field match {
+          case None => ().validNel.pure[NonEmptyList]
+          case Some(content) =>
+            content.flatMap(validation)
+        }
+
+      val firstNameValidationResults = validateFirstName(value.firstName)
+      val lastNameValidationResults = validateLastName(value.lastName)
+      val emailsValidationResults =
+        validateListField(value.emails)(validateEmail)
+      val phoneNumbersValidationResults =
+        validateListField(value.phoneNumbers)(validatePhoneNumber)
+
+      (firstNameValidationResults ::: lastNameValidationResults ::: emailsValidationResults ::: phoneNumbersValidationResults).combineAll match {
+        case Valid(_) => S.unit
+        case Invalid(errors) =>
+          S.raiseError(UserValidationError(value, errors))
+      }
+    }
+
   }
 }
