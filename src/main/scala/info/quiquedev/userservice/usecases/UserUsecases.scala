@@ -36,6 +36,8 @@ trait UserUsecases[F[_]] {
 }
 
 object UserUsecases {
+  private type AdditionalData = (NonEmptyList[Email], NonEmptyList[PhoneNumber])
+
   def apply[F[_]](implicit ev: UserUsecases[F]) = ev
 
   def impl[F[_]: Async](implicit xa: Transactor[F]): UserUsecases[F] =
@@ -75,36 +77,52 @@ object UserUsecases {
       }
 
       override def findUserById(userId: UserId): F[Option[User]] = {
-        val maybeUserData: ConnectionIO[Option[(UserId, FirstName, LastName)]] =
-          sql"select first_name, last_name from users where user_id = $userId"
-            .query[(FirstName, LastName)]
-            .option
-            .map {
-              _.map {
-                case (firstName, lastName) => (userId, firstName, lastName)
-              }
-            }
+        // val maybeUserData: ConnectionIO[Option[(UserId, FirstName, LastName)]] =
+        //   sql"select first_name, last_name from users where user_id = $userId"
+        //     .query[(FirstName, LastName)]
+        //     .option
+        //     .map {
+        //       _.map {
+        //         case (firstName, lastName) => (userId, firstName, lastName)
+        //       }
+        //     }
 
-        loadUser(maybeUserData)
+        // val result: ConnectionIO[Option[User]] = for {
+        //   maybeUserData <- maybeUserData
+        //   maybeUser <- maybeUserData match {
+        //     case None => none[User].pure[ConnectionIO]
+        //     case Some((userId, firstName, lastName)) =>
+        //       findEmailsAndPhoneNumbers(userId).map {
+        //         case (emails, phoneNumbers) =>
+        //           User(userId, firstName, lastName, emails, phoneNumbers).some
+        //       }
+        //   }
+        // } yield maybeUser
+
+        // loadUser(maybeUserData)
+
+        ???
       }
 
       override def findUserByName(
           firstName: FirstName,
           lastName: LastName
       ): F[Option[NonEmptyList[User]]] = {
-        val maybeUserData: ConnectionIO[Option[(UserId, FirstName, LastName)]] =
-          sql"""
-            select user_id
-            from users
-            where lower(first_name) = lower($firstName) and lower(last_name) = lower($lastName) 
-          """
-            .query[UserId]
-            .option
-            .map {
-              _.map(userId => (userId, firstName, lastName))
-            }
+        // val maybeUserData: ConnectionIO[Option[(UserId, FirstName, LastName)]] =
+        //   sql"""
+        //     select user_id
+        //     from users
+        //     where lower(first_name) = lower($firstName) and lower(last_name) = lower($lastName)
+        //   """
+        //     .query[UserId]
+        //     .option
+        //     .map {
+        //       _.map(userId => (userId, firstName, lastName))
+        //     }
 
-        loadUser(maybeUserData)
+        // loadUser(maybeUserData)
+
+        ???
       }
 
       override def addEmailToUser(
@@ -130,6 +148,14 @@ object UserUsecases {
       private def existsUserId(userId: UserId): ConnectionIO[Boolean] = ???
       private def verifyAvailableUserId(userId: UserId): ConnectionIO[Unit] =
         ???
+      private def verifyAvailableEmailId(
+          userId: UserId,
+          email: EmailId
+      ): ConnectionIO[Unit] = ???
+      private def verifyAvailablePhoneNumberId(
+          userId: UserId,
+          email: EmailId
+      ): ConnectionIO[Unit] = ???
       private def verifyExistingUserId(userId: UserId): ConnectionIO[Unit] = ???
       private def insertEmail(
           userId: UserId,
@@ -142,47 +168,47 @@ object UserUsecases {
       ): ConnectionIO[Unit] =
         ???
 
-      private def findEmailsForUser(
-          userId: UserId
-      ): ConnectionIO[NonEmptyList[Email]] =
-        sql"""
-          select email_id, email
-          from emails
-          where user_id = $userId = userId 
-        """.query[Email].nel
+      // private def findEmailsForUsers(
+      //     userIds: NonEmptyList[UserId]
+      // ): ConnectionIO[Map[UserId -> NonEmptyList[Email]]] =
+      //   sql"""
+      //     select user_id, email_id, email
+      //     from emails
+      //     where user_id in ${userIds.toList.toSet} = userId
+      //   """.query[(UserId, EmailId, String)].nel.map { result => ??? }
 
-      private def findPhoneNumbersForUser(
-          userId: UserId
-      ): ConnectionIO[NonEmptyList[PhoneNumber]] =
-        sql"""
-          select phone_number_id, phone_number
-          from phone_numbers
-          where user_id = $userId = userId 
-        """.query[PhoneNumber].nel
+      // private def findPhoneNumbersForUser(
+      //     userId: UserId
+      // ): ConnectionIO[NonEmptyList[PhoneNumber]] =
+      //   sql"""
+      //     select phone_number_id, phone_number
+      //     from phone_numbers
+      //     where user_id = $userId = userId
+      //   """.query[PhoneNumber].nel
 
-      private def loadUser(
-          maybeUserData: ConnectionIO[Option[(UserId, FirstName, LastName)]]
-      ): F[Option[User]] = {
-        def findEmailsAndPhoneNumbers(userId: UserId) =
-          for {
-            emails <- findEmailsForUser(userId)
-            phoneNumbers <- findPhoneNumbersForUser(userId)
-          } yield (emails, phoneNumbers)
+      // private def getAdditionalData(
+      //     userIds: NonEmptyList[UserId]
+      // ): F[Map[UserId, AdditionalData]] = {
+      //   def findEmailsAndPhoneNumbers(userId: UserId) =
+      //     for {
+      //       emails <- findEmailsForUser(userId)
+      //       phoneNumbers <- findPhoneNumbersForUser(userId)
+      //     } yield (emails, phoneNumbers)
 
-        val result: ConnectionIO[Option[User]] = for {
-          maybeUserData <- maybeUserData
-          maybeUser <- maybeUserData match {
-            case None => none[User].pure[ConnectionIO]
-            case Some((userId, firstName, lastName)) =>
-              findEmailsAndPhoneNumbers(userId).map {
-                case (emails, phoneNumbers) =>
-                  User(userId, firstName, lastName, emails, phoneNumbers).some
-              }
-          }
-        } yield maybeUser
+      //   val result: ConnectionIO[Option[User]] = for {
+      //     maybeUserData <- maybeUserData
+      //     maybeUser <- maybeUserData match {
+      //       case None => none[User].pure[ConnectionIO]
+      //       case Some((userId, firstName, lastName)) =>
+      //         findEmailsAndPhoneNumbers(userId).map {
+      //           case (emails, phoneNumbers) =>
+      //             User(userId, firstName, lastName, emails, phoneNumbers).some
+      //         }
+      //     }
+      //   } yield maybeUser
 
-        result.transact(xa)
-      }
+      //   result.transact(xa)
+      // }
     }
 
   private implicit final class ConnectionIOUpdatesExtensions(
