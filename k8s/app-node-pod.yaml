@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app
+  labels:
+    component: web
+spec:
+  containers:
+    - name:  app
+      image:  quiquedev/user-service
+      ports:
+        - containerPort: 8080 
+      env:
+        - name: DB_URL
+          value: 'jdbc:postgresql://persistence:5000/user-service-local'
+        - name: DB_FLYWAY_USER
+          value: flyway_user
+        - name: DB_FLYWAY_PASSWORD
+          value: flyway_password
+        - name: DB_APP_USER
+          value: app_user
+        - name: DB_APP_PASSWORD 
+          value: app_password

@@ -1,0 +1,11 @@
+version: '3'
+
+services: 
+  db:
+    image: 'postgres:12.2'
+    ports: 
+      - '5432:5432'
+    environment: 
+      POSTGRES_USER: flyway_user
+      POSTGRES_PASSWORD: flyway_password
+      POSTGRES_DB: user-service-local

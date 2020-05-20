@@ -1,0 +1,19 @@
+language: scala
+
+jdk: openjdk11
+
+scala:
+  - 2.13.1
+
+branches:
+  only:
+    - master
+
+services:
+  - docker
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION test
+  - docker build -t quiquedev/user-service:latest .
+  - docker login --username=quiquedev --password=$DOCKER_HUB_PASSWORD 
+  - docker push quiquedev/user-service:latest

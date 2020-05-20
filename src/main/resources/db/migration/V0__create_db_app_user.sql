@@ -1,0 +1,1 @@
+CREATE USER ${dbAppUser} WITH PASSWORD '${dbAppPassword}';

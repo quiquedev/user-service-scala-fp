@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: persistence
+  labels:
+    component: persistence
+spec:
+  containers:
+    - name: db
+      image: postgres:12.2
+      ports:
+        - containerPort: 5432
+      env:
+        - name: POSTGRES_USER
+          value: flyway_user
+        - name: POSTGRES_PASSWORD
+          value: flyway_password
+        - name: POSTGRES_DB
+          value: user-service-local

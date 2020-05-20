@@ -1,0 +1,14 @@
+.bloop
+.metals
+project/target
+project/project
+project/metals.sbt
+target
+Dockerfile
+docker-compose.yaml
+.dockerignore
+.gitignore
+.scalafmt.conf
+.travis.yml
+.vscode
+.idea

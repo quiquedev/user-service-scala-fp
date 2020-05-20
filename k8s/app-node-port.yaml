@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name:  user-service-node-port
+spec:
+  type:  NodePort
+  ports:
+    - port: 9000
+      targetPort: 8080
+      nodePort: 31515
+  selector:
+    component: web
