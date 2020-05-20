@@ -1,4 +1,4 @@
-package info.quiquedev.userservice.usecases
+package info.quiquedev.userservice
 
 import cats.effect.Sync
 import org.slf4j.LoggerFactory
@@ -6,6 +6,7 @@ import scala.util.Try
 import cats.implicits._
 
 trait Logger[F[_]] {
+  def info(msg: String): F[Unit]
   def error(msg: String, t: Throwable): F[Unit]
 }
 
@@ -14,9 +15,14 @@ object Logger {
 
   def impl[F[_]: Sync](name: String): Logger[F] = new Logger[F] {
     private val logger = LoggerFactory.getLogger(name)
+
     override def error(msg: String, t: Throwable): F[Unit] =
       Try(logger.error(msg, t)) match {
         case _ => ().pure[F]
       }
+
+    override def info(msg: String): F[Unit] = Try(logger.info(msg)) match {
+      case _ => ().pure[F]
+    }
   }
 }
