@@ -34,6 +34,7 @@ lazy val root = (project in file("."))
     ).map(_ % Test),
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+
     // assembly
     test in assembly := {},
     mainClass in assembly := Some("info.quiquedev.userservice.Main"),
