@@ -13,6 +13,7 @@ object UserUsecasesDomain {
   import DomainValidation._
 
   sealed trait UserUsecasesError extends RuntimeException
+  final case class DatabaseError(msg: String) extends UserUsecasesError
   final case class UserValidationError(user: User, errors: NonEmptyList[String])
       extends UserUsecasesError
   final case class EmailValidationError(
@@ -88,8 +89,8 @@ object UserUsecasesDomain {
       id: UserId,
       firstName: FirstName,
       lastName: LastName,
-      emails: Option[NonEmptyList[Email]],
-      phoneNumbers: Option[NonEmptyList[PhoneNumber]]
+      emails: NonEmptyList[Email],
+      phoneNumbers: NonEmptyList[PhoneNumber]
   )
 
   object User {
@@ -187,13 +188,9 @@ object UserUsecasesDomain {
         value: User
     )(implicit S: Sync[F]): F[Unit] = {
       def validateListField[A](
-          field: Option[NonEmptyList[A]]
+          field: NonEmptyList[A]
       )(validation: A => ValidationResults): ValidationResults =
-        field match {
-          case None => ().validNel.pure[NonEmptyList]
-          case Some(content) =>
-            content.flatMap(validation)
-        }
+        field.flatMap(validation)
 
       val firstNameValidationResults = validateFirstName(value.firstName)
       val lastNameValidationResults = validateLastName(value.lastName)
