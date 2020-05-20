@@ -5,8 +5,9 @@ import cats.effect.Sync
 import cats.data.Validated
 import info.quiquedev.userservice._
 import cats.implicits._
+import doobie.util.Get
+import doobie.util.Put
 import cats.data.Validated._
-
 
 object UserUsecasesDomain {
   type ValidationResult = Validated[NonEmptyList[String], Unit]
@@ -38,11 +39,30 @@ object UserUsecasesDomain {
       extends UserUsecasesError
 
   final case class UserId(value: Int) extends AnyVal
+  object UserId {
+    implicit val userIdGet: Get[UserId] = Get[Int].map(UserId(_))
+    implicit val userIdPut: Put[UserId] = Put[Int].contramap(_.value)
+  }
+
   final case class EmailId(value: Int) extends AnyVal
+  object EmailId {
+    implicit val emailIdGet: Get[EmailId] = Get[Int].map(EmailId(_))
+    implicit val emailIdPut: Put[EmailId] = Put[Int].contramap(_.value)
+  }
+
   final case class PhoneNumberId(value: Int) extends AnyVal
+  object PhoneNumberId {
+    implicit val phoneNumberIdGet: Get[PhoneNumberId] =
+      Get[Int].map(PhoneNumberId(_))
+    implicit val phoneNumberIdPut: Put[PhoneNumberId] =
+      Put[Int].contramap(_.value)
+  }
 
   final case class FirstName(value: String) extends AnyVal
   private object FirstName {
+    implicit val firstNameGet: Get[FirstName] = Get[String].map(FirstName(_))
+    implicit val firstNamePut: Put[FirstName] = Put[String].contramap(_.value)
+
     def validate(value: FirstName): ValidationResults =
       Validated
         .condNel(
@@ -55,6 +75,9 @@ object UserUsecasesDomain {
   final case class LastName(value: String) extends AnyVal
 
   private object LastName {
+    implicit val lastNameGet: Get[LastName] = Get[String].map(LastName(_))
+    implicit val lastNamePut: Put[LastName] = Put[String].contramap(_.value)
+
     def validate(value: LastName): ValidationResults =
       Validated
         .condNel(
