@@ -1,7 +1,9 @@
 CREATE TABLE users (
   id INTEGER PRIMARY KEY,
-  first_name VARCHAR(500) NOT NULL,
-  last_name VARCHAR(500) NOT NULL
+  firstName VARCHAR(500) NOT NULL,
+  lastName VARCHAR(500) NOT NULL,
+  emails JSON NOT NULL,
+  phoneNumbers JSON NOT NULL
 );
 
-GRANT SELECT, INSERT ON users TO ${dbAppUser};
+GRANT SELECT, INSERT, UPDATE, DELETE ON users TO ${dbAppUser};

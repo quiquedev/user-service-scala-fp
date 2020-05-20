@@ -8,55 +8,64 @@ import cats.implicits._
 import doobie.util.Get
 import doobie.util.Put
 import cats.data.Validated._
+import io.circe.generic.extras.encoding.UnwrappedEncoder._
+import io.circe.generic.extras.decoding.UnwrappedDecoder._
+import io.circe._
 
-object UserUsecasesDomain {
+object UserUsecasesDomain extends App{
   import DomainValidation._
-
+  
   sealed trait UserUsecasesError extends RuntimeException
   final case class DatabaseError(msg: String) extends UserUsecasesError
   final case class UserValidationError(user: User, errors: NonEmptyList[String])
       extends UserUsecasesError
-  final case class EmailValidationError(
+  final case class EmailValidationError(  
       email: Email,
       errors: NonEmptyList[String]
-  ) extends UserUsecasesError
+  ) extends UserUsecasesError    
   final case class PhoneNumberValidationError(
       phoneNumber: PhoneNumber,
       errors: NonEmptyList[String]
-  ) extends UserUsecasesError
+  ) extends UserUsecasesError    
 
   final case class UserId(value: Int) extends AnyVal
   object UserId {
     implicit val userIdGet: Get[UserId] = Get[Int].map(UserId(_))
     implicit val userIdPut: Put[UserId] = Put[Int].contramap(_.value)
-  }
+  }  
 
   final case class EmailId(value: Int) extends AnyVal
   object EmailId {
     implicit val emailIdGet: Get[EmailId] = Get[Int].map(EmailId(_))
     implicit val emailIdPut: Put[EmailId] = Put[Int].contramap(_.value)
-  }
+
+    implicit val emailIdEncoder: Encoder[EmailId] = encodeUnwrapped
+    implicit val emailIdDecoder: Decoder[EmailId] = decodeUnwrapped
+  }  
 
   final case class PhoneNumberId(value: Int) extends AnyVal
   object PhoneNumberId {
     implicit val phoneNumberIdGet: Get[PhoneNumberId] =
       Get[Int].map(PhoneNumberId(_))
-    implicit val phoneNumberIdPut: Put[PhoneNumberId] =
+    implicit val phoneNumberIdPut: Put[PhoneNumberId] =  
       Put[Int].contramap(_.value)
-  }
+
+    implicit val phoneNumberIdEncoder: Encoder[PhoneNumberId] = encodeUnwrapped
+    implicit val phoneNumberIdDecoder: Decoder[PhoneNumberId] = decodeUnwrapped
+  }    
 
   final case class FirstName(value: String) extends AnyVal
   object FirstName {
     implicit val firstNameGet: Get[FirstName] = Get[String].map(FirstName(_))
     implicit val firstNamePut: Put[FirstName] = Put[String].contramap(_.value)
-  }
-  final case class LastName(value: String) extends AnyVal
+  }  
 
+  final case class LastName(value: String) extends AnyVal
   object LastName {
     implicit val lastNameGet: Get[LastName] = Get[String].map(LastName(_))
     implicit val lastNamePut: Put[LastName] = Put[String].contramap(_.value)
 
-  }
+  }  
 
   final case class Email(id: EmailId, value: String)
   object Email {
@@ -66,24 +75,24 @@ object UserUsecasesDomain {
           case Valid(_) => S.unit
           case Invalid(errors) =>
             S.raiseError(EmailValidationError(value, errors))
-        }
-      }
-    }
-  }
+        }    
+      }  
+    }  
+  }  
 
   final case class PhoneNumber(id: EmailId, value: String)
   object PhoneNumber {
     implicit final class PhoneNumberExtensions(val value: PhoneNumber)
         extends AnyVal {
-      def validateF[F[_]](implicit S: Sync[F]): F[Unit] = {
+      def validateF[F[_]](implicit S: Sync[F]): F[Unit] = {  
         validatePhoneNumber(value).combineAll match {
           case Valid(_) => S.unit
           case Invalid(errors) =>
             S.raiseError(PhoneNumberValidationError(value, errors))
-        }
-      }
-    }
-  }
+        }    
+      }  
+    }  
+  }  
 
   final case class User(
       id: UserId,
@@ -91,7 +100,7 @@ object UserUsecasesDomain {
       lastName: LastName,
       emails: NonEmptyList[Email],
       phoneNumbers: NonEmptyList[PhoneNumber]
-  )
+  )    
 
   object User {
     implicit final class UserExtensions(val value: User) extends AnyVal {
@@ -100,9 +109,9 @@ object UserUsecasesDomain {
         for {
           _ <- validateUserNullFieldsF(value)
           _ <- validateUserFieldContentsF(value)
-        } yield ()
-    }
-  }
+        } yield ()  
+    }    
+  }  
 
   private object DomainValidation {
     private val FirstNameMaxLength = 500
@@ -205,6 +214,5 @@ object UserUsecasesDomain {
           S.raiseError(UserValidationError(value, errors))
       }
     }
-
   }
 }
