@@ -5,4 +5,4 @@ CREATE TABLE emails (
   PRIMARY KEY(user_id, email_id)
 );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON emails TO ${dbAppUser};
+GRANT SELECT, INSERT, UPDATE ON emails TO ${dbAppUser};

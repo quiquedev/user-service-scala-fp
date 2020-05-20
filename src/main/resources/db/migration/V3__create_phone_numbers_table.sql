@@ -5,4 +5,4 @@ CREATE TABLE phone_numbers (
   PRIMARY KEY(user_id, phone_number_id)
 );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON phone_numbers TO ${dbAppUser};
+GRANT SELECT, INSERT, UPDATE ON phone_numbers TO ${dbAppUser};
