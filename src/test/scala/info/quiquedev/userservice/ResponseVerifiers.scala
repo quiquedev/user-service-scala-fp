@@ -1,4 +1,4 @@
-package info.quiquedev.userservice.routes
+package info.quiquedev.userservice
 
 import cats.effect.IO
 import org.http4s._

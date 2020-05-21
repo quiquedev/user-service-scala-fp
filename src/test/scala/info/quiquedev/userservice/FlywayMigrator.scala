@@ -1,4 +1,4 @@
-package info.quiquedev.userservice.usecases
+package info.quiquedev.userservice
 
 import doobie.util.transactor.Transactor
 import cats.effect.IO

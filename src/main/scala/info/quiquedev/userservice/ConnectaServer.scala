@@ -10,7 +10,6 @@ import scala.concurrent.ExecutionContext.global
 import java.time.Clock
 import cats.Monad
 import cats.implicits._
-import info.quiquedev.userservice.routes.HealthRoute
 
 object UserServiceServer {
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift: Monad](
@@ -22,8 +21,11 @@ object UserServiceServer {
       transactor <- Stream.eval(DatabaseUtils.migrateDbAndGetTransactor())
       _ <- BlazeClientBuilder[F](global).stream
 
+      httpApp = {
+        implicit val U: UserUsecases[F] = ???
 
-      httpApp = (HealthRoute.value).orNotFound
+        Routes.all[F].orNotFound
+      }
 
       finalHttpApp = Logger.httpApp(true, true)(httpApp)
 

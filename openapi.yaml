@@ -342,3 +342,25 @@ components:
           items:
             $ref: '#/components/schemas/PhoneNumber'
 
+    NewUser:
+      type: object
+      required:
+        - lastName
+        - firstName
+        - emails
+        - phoneNumbers
+      properties:
+        lastName:
+          $ref: '#/components/schemas/LastName'
+        firstName:
+          $ref: '#/components/schemas/FirstName'
+        emails:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/Email'
+        phoneNumbers:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/PhoneNumber'
