@@ -27,14 +27,15 @@ object Dto {
   private val MaxSearchLimit = 100
   private val DefaultSearchLimit = 10
 
-  sealed trait UserUsecasesError extends RuntimeException
+  sealed trait DtoValidationError extends RuntimeException
   final case class InternalError(msg: String) extends RuntimeException
   final case class NewUserDtoValidationError(
       errors: NonEmptyList[String]
-  ) extends UserUsecasesError
+  ) extends DtoValidationError
   final case class QueryParamValidationError(
       errors: NonEmptyList[String]
-  ) extends UserUsecasesError
+  ) extends DtoValidationError
+
   final case class UserIdDto(value: Int) extends AnyVal
   object UserIdDto {
     implicit val userIdDtoEncoder: Encoder[UserIdDto] = encodeUnwrapped

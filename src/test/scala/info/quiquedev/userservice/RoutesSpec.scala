@@ -879,4 +879,116 @@ class RoutesSpec
       }
     }
   }
+
+  "/users/{userId}" should {
+    "support GET request to find an user by the user id" which {
+      "return 200 if the user is found" in new TestEnvironment {
+        // given
+        val user = User(
+          UserId(1),
+          FirstName("enrique"),
+          LastName("molina"),
+          List(Email(EmailId(1), Mail("emolina@gmail.com"))),
+          List(PhoneNumber(PhoneNumberId(1), Number("12345")))
+        )
+
+        when(usecases.findUserById(user.id)) thenReturn user.some.pure[IO]
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = uri"/users/1"
+              )
+            )
+            .value
+
+        // then
+        val expectedResponseBody =
+          """
+        {
+          "id": 1,
+          "lastName": "molina",
+          "firstName": "enrique",
+          "emails": [{"id": 1, "mail": "emolina@gmail.com"}],
+          "phoneNumbers": [{"id": 1, "number": "12345"}]
+        }
+        """
+
+        verifyJsonResponse(
+          response,
+          200,
+          parse(expectedResponseBody).getOrElse(
+            fail("expected response body is not a valid json")
+          )
+        )
+
+      }
+
+      "return 404 if the user is not found" in new TestEnvironment {
+        // given
+        val userId = UserId(1)
+        when(usecases.findUserById(userId)) thenReturn none[User].pure[IO]
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = uri"/users/1"
+              )
+            )
+            .value
+
+        // then
+        verifyEmptyResponse(response, 404)
+      }
+    }
+
+    "support DELETE request to delete an user by the user id" which {
+      "return 200 if the user has been deleted" in new TestEnvironment {
+        // given
+        val userId = UserId(1)
+
+        when(usecases.deleteUserById(userId)) thenReturn IO.unit
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.DELETE,
+                uri = uri"/users/1"
+              )
+            )
+            .value
+
+        // then
+        verifyEmptyResponse(response, 200)
+      }
+
+      "return 404 if the user does not exist" in new TestEnvironment {
+        // given
+        val userId = UserId(1)
+        when(usecases.deleteUserById(userId)) thenReturn IO.raiseError(UserNotFoundError)
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.DELETE,
+                uri = uri"/users/1"
+              )
+            )
+            .value
+
+        // then
+        verifyEmptyResponse(response, 404)
+      }
+    }
+  }
 }

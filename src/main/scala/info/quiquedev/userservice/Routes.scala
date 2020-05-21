@@ -54,7 +54,7 @@ object Routes {
         }
       case GET -> Root / "users" :? FirstNameDtoParamMatcher(firstNameDto) :? LastNameDtoParamMatcher(
             lastNameDto
-          ) :? SearchLimitDtoOptionalParamMatcher(searchLimitDto) => {
+          ) :? SearchLimitDtoOptionalParamMatcher(searchLimitDto) =>
         (for {
           searchLimit <- SearchLimitDto.toDomainF(searchLimitDto)
           firstName <- FirstNameDto.toDomainF(firstNameDto)
@@ -65,7 +65,19 @@ object Routes {
           case QueryParamValidationError(errors) =>
             BadRequest(errors.toList.mkString("|"))
         }
-      }
+      case GET -> Root / "users" / IntVar(userId) =>
+        for {
+          maybeUser <- findUserById(UserId(userId))
+          response <- maybeUser.map(u => Ok(u.toDto)).getOrElse(NotFound())
+        } yield response
+
+      case DELETE -> Root / "users" / IntVar(userId) =>
+        (for {
+          _ <- deleteUserById(UserId(userId))
+          response <- Ok()
+        } yield response).recoverWith {
+          case UserNotFoundError => NotFound()
+        }
     }
   }
 

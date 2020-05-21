@@ -78,8 +78,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-        '400':
-          description: user id validation error
         '404':
           description: user not found for the given user id
     delete:

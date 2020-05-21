@@ -18,6 +18,7 @@ trait UserUsecases[F[_]] {
       lastName: LastName,
       searchLimit: SearchLimit
   ): F[List[User]]
+  def deleteUserById(userId: UserId): F[Unit]
   def addEmailToUser(
       userId: UserId,
       email: Email

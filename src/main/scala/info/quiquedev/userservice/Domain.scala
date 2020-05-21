@@ -14,6 +14,7 @@ import io.circe._
 
 object Domain {
   sealed trait UserUsecasesError extends RuntimeException
+  final case object UserNotFoundError extends UserUsecasesError
 
   final case class UserId(value: Int) extends AnyVal
   object UserId {
