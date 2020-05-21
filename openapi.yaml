@@ -163,12 +163,6 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/EmailId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Mail'
       responses:
         '200':
           description: email has been deleted
@@ -250,12 +244,6 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/PhoneNumberId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Number'
       responses:
         '200':
           description: number has been deleted
