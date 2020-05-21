@@ -15,8 +15,9 @@ trait UserUsecases[F[_]] {
   def findUserById(userId: UserId): F[Option[User]]
   def findUserByName(
       firstName: FirstName,
-      lastName: LastName
-  ): F[Option[NonEmptyList[User]]]
+      lastName: LastName,
+      searchLimit: SearchLimit
+  ): F[List[User]]
   def addEmailToUser(
       userId: UserId,
       email: Email

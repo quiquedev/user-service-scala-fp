@@ -27,6 +27,8 @@ object Domain {
     implicit val emailIdDecoder: Decoder[EmailId] = decodeUnwrapped
   }
 
+  final case class SearchLimit(value: Int) extends AnyVal
+
   final case class PhoneNumberId(value: Int) extends AnyVal
   object PhoneNumberId {
     implicit val phoneNumberIdEncoder: Encoder[PhoneNumberId] = encodeUnwrapped

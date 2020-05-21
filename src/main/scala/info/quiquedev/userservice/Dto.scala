@@ -10,11 +10,8 @@ import doobie.util.Put
 import cats.data.Validated._
 import io.circe.generic.extras.encoding.UnwrappedEncoder._
 import io.circe.generic.extras.decoding.UnwrappedDecoder._
-import org.http4s._
-import org.http4s.circe._
 import io.circe._
 import io.circe.generic.auto._
-import io.circe.generic.semiauto._
 import info.quiquedev.userservice.Domain._
 
 object Dto {
@@ -27,13 +24,17 @@ object Dto {
   private val MaxMails = 10
   private val PhoneNumberMaxLength = 500
   private val MaxNumbers = 10
+  private val MaxUsersToFind = 100
+  private val DefaultMaxUserToFind = 10
 
   sealed trait UserUsecasesError extends RuntimeException
   final case class InternalError(msg: String) extends RuntimeException
   final case class NewUserDtoValidationError(
       errors: NonEmptyList[String]
   ) extends UserUsecasesError
-
+  final case class QueryParamValidationError(
+      errors: NonEmptyList[String]
+  ) extends UserUsecasesError
   final case class UserIdDto(value: Int) extends AnyVal
   object UserIdDto {
     implicit val userIdDtoEncoder: Encoder[UserIdDto] = encodeUnwrapped
@@ -108,6 +109,14 @@ object Dto {
             )
           )
       }
+
+    def toDomainF[F[_]](
+        value: FirstNameDto
+    )(implicit S: Sync[F]): F[FirstName] =
+      validate(value).combineAll match {
+        case Valid(_)        => FirstName(value.value).pure[F]
+        case Invalid(errors) => S.raiseError(QueryParamValidationError(errors))
+      }
   }
 
   final case class LastNameDto(value: String) extends AnyVal
@@ -115,7 +124,7 @@ object Dto {
   object LastNameDto {
     implicit val lastNameDtoEncoder: Encoder[LastNameDto] = encodeUnwrapped
     implicit val lastNameDtoDecoder: Decoder[LastNameDto] = decodeUnwrapped
-
+    
     def validate(value: LastNameDto): ValidationResults =
       Option(value.value).filter(_.nonNullOrEmpty) match {
         case None =>
@@ -129,6 +138,36 @@ object Dto {
             )
           )
       }
+
+    def toDomainF[F[_]](value: LastNameDto)(implicit S: Sync[F]): F[LastName] =
+      validate(value).combineAll match {
+        case Valid(_)        => LastName(value.value).pure[F]
+        case Invalid(errors) => S.raiseError(QueryParamValidationError(errors))
+      }
+  }
+
+  final case class SearchLimitDto(value: Int) extends AnyVal
+  object SearchLimitDto {
+    private def validate(value: SearchLimitDto): ValidationResults =
+      NonEmptyList.of(
+        Validated.condNel(
+          value.value >= 1 && value.value <= MaxUsersToFind,
+          (),
+          s"searchLimit must be between 1 and $MaxUsersToFind"
+        )
+      )
+
+    def toDomainF[F[_]](
+        value: Option[SearchLimitDto]
+    )(implicit S: Sync[F]): F[SearchLimit] = value match {
+      case None => SearchLimit(DefaultMaxUserToFind).pure[F]
+      case Some(number) =>
+        validate(number).combineAll match {
+          case Valid(_) => SearchLimit(number.value).pure[F]
+          case Invalid(errors) =>
+            S.raiseError(QueryParamValidationError(errors))
+        }
+    }
   }
 
   final case class EmailWithIdDto(id: EmailIdDto, mail: MailDto)
@@ -147,10 +186,7 @@ object Dto {
   )
 
   object UserDto {
-    implicit def userDtoEntityEncoder[F[_]: Sync]: EntityEncoder[F, UserDto] =
-      jsonEncoderOf
-
-    implicit final class UserExtensions(val value: User) extends AnyVal {
+       implicit final class UserExtensions(val value: User) extends AnyVal {
       def toDto: UserDto = {
         import value._
 
@@ -187,10 +223,7 @@ object Dto {
         phoneNumbers: Set[NumberDto]
     )
 
-    implicit def newUserDtoEntityDecoder[F[_]: Sync]
-        : EntityDecoder[F, NewUserDto] = jsonOf
-
-    implicit final class NewUserDtoExtensions(val value: NewUserDto)
+        implicit final class NewUserDtoExtensions(val value: NewUserDto)
         extends AnyVal {
       def toDomainF[F[_]: Sync]: F[NewUser] =
         for {
@@ -280,7 +313,9 @@ object Dto {
             (),
             s"phoneNumbers can have a max size of $MaxMails"
           )
-        ) ++ newUser.phoneNumbers.toList.flatMap(n => NumberDto.validate(n).toList)
+        ) ++ newUser.phoneNumbers.toList.flatMap(n =>
+          NumberDto.validate(n).toList
+        )
 
         val validationResults =
           LastNameDto.validate(newUser.lastName) ::: FirstNameDto.validate(
