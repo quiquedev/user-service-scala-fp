@@ -39,7 +39,9 @@ lazy val root = (project in file("."))
     // assembly
     test in assembly := {},
     mainClass in assembly := Some("info.quiquedev.userservice.Main"),
-    assemblyJarName in assembly := "user-service.jar"
+    assemblyJarName in assembly := "user-service.jar",
+
+    coverageEnabled := true
   )
 
 scalacOptions ++= Seq(
