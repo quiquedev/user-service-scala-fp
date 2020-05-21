@@ -11,7 +11,7 @@ import Domain._
 import Dto._
 
 trait UserUsecases[F[_]] {
-  def createUser(newUser: NewUserDto): F[User]
+  def createUser(newUser: NewUser): F[User]
   def findUserById(userId: UserId): F[Option[User]]
   def findUserByName(
       firstName: FirstName,

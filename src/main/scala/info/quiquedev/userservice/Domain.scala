@@ -23,22 +23,27 @@ object Domain {
 
   final case class EmailId(value: Int) extends AnyVal
   object EmailId {
-    implicit val emailIdGet: Get[EmailId] = Get[Int].map(EmailId(_))
-    implicit val emailIdPut: Put[EmailId] = Put[Int].contramap(_.value)
-
     implicit val emailIdEncoder: Encoder[EmailId] = encodeUnwrapped
     implicit val emailIdDecoder: Decoder[EmailId] = decodeUnwrapped
   }
 
   final case class PhoneNumberId(value: Int) extends AnyVal
   object PhoneNumberId {
-    implicit val phoneNumberIdGet: Get[PhoneNumberId] =
-      Get[Int].map(PhoneNumberId(_))
-    implicit val phoneNumberIdPut: Put[PhoneNumberId] =
-      Put[Int].contramap(_.value)
-
     implicit val phoneNumberIdEncoder: Encoder[PhoneNumberId] = encodeUnwrapped
     implicit val phoneNumberIdDecoder: Decoder[PhoneNumberId] = decodeUnwrapped
+  }
+
+  final case class Number(value: String) extends AnyVal
+
+  object Number {
+    implicit val numberEncoder: Encoder[Number] = encodeUnwrapped
+    implicit val numberDecoder: Decoder[Number] = decodeUnwrapped
+  }
+
+  final case class Mail(value: String) extends AnyVal
+  object Mail {
+    implicit val mailEncoder: Encoder[Mail] = encodeUnwrapped
+    implicit val mailDecocer: Decoder[Mail] = decodeUnwrapped
   }
 
   final case class FirstName(value: String) extends AnyVal
@@ -54,9 +59,9 @@ object Domain {
 
   }
 
-  final case class Email(id: EmailId, value: String)
+  final case class Email(id: EmailId, mail: Mail)
 
-  final case class PhoneNumber(id: EmailId, value: String)
+  final case class PhoneNumber(id: EmailId, number: Number)
 
   final case class User(
       id: UserId,
@@ -65,4 +70,12 @@ object Domain {
       emails: List[Email],
       phoneNumbers: List[PhoneNumber]
   )
+
+  final case class NewUser(
+      firstName: FirstName,
+      lastName: LastName,
+      emails: List[Mail],
+      phoneNumbers: List[Number]
+  )
+
 }

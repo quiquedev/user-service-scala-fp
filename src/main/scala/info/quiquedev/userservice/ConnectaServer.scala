@@ -22,7 +22,7 @@ object UserServiceServer {
       _ <- BlazeClientBuilder[F](global).stream
 
       httpApp = {
-        implicit val U: UserUsecases[F] = ???
+        implicit val U: UserUsecases[F] = null
 
         Routes.all[F].orNotFound
       }

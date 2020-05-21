@@ -8,7 +8,11 @@ import org.http4s._
 import org.http4s.circe._
 import java.time.Instant
 import info.quiquedev.userservice.UserUsecases
-
+import Dto.UserDto._
+import Dto.NewUserDto
+import Dto.NewUserDto._
+import info.quiquedev.userservice.Dto.NewUserDtoValidationError
+import org.http4s.circe.CirceEntityCodec._
 
 object Routes {
   private def health[F[_]: Sync]: HttpRoutes[F] = {
@@ -21,16 +25,25 @@ object Routes {
   }
 
   private def users[F[_]: Sync: UserUsecases]: HttpRoutes[F] = {
+    val U = UserUsecases[F]
+    import U._
+
     val dsl = new Http4sDsl[F] {}
     import Domain._
 
     import dsl._
 
     HttpRoutes.of[F] {
-      ???
+      case req @ POST -> Root / "users" =>
+        for {
+          newUserDto <- req.as[NewUserDto]
+          newUser <- newUserDto.toDomainF
+          createdUser <- createUser(newUser)
+          response <- Created(createdUser.toDto)
+        } yield response
     }
   }
 
   def all[F[_]: Sync: UserUsecases]: HttpRoutes[F] = health <+> users
-  
+
 }

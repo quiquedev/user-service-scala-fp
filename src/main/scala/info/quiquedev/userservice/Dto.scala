@@ -10,8 +10,12 @@ import doobie.util.Put
 import cats.data.Validated._
 import io.circe.generic.extras.encoding.UnwrappedEncoder._
 import io.circe.generic.extras.decoding.UnwrappedDecoder._
+import org.http4s._
+import org.http4s.circe._
 import io.circe._
-import org.http4s.Uri.UserInfo
+import io.circe.generic.auto._
+import io.circe.generic.semiauto._
+import info.quiquedev.userservice.Domain._
 
 object Dto {
   private type ValidationResult = Validated[NonEmptyList[String], Unit]
@@ -23,8 +27,8 @@ object Dto {
   private val PhoneNumberMaxLength = 500
 
   sealed trait UserUsecasesError extends RuntimeException
+  final case class InternalError(msg: String) extends RuntimeException
   final case class NewUserDtoValidationError(
-      newUserDto: NewUserDto,
       errors: NonEmptyList[String]
   ) extends UserUsecasesError
 
@@ -38,9 +42,10 @@ object Dto {
     implicit val emailIdDtoEncoder: Encoder[EmailIdDto] = encodeUnwrapped
   }
 
-  final case class EmailDto(value: String) extends AnyVal
-  object EmailDto {
-    implicit val emailIdDtoEncoder: Encoder[EmailDto] = encodeUnwrapped
+  final case class MailDto(value: String) extends AnyVal
+  object MailDto {
+    implicit val mailDtoEncoder: Encoder[MailDto] = encodeUnwrapped
+    implicit val mailDtoDecoder: Decoder[MailDto] = decodeUnwrapped
   }
 
   final case class PhoneNumberIdDto(value: Int) extends AnyVal
@@ -49,27 +54,45 @@ object Dto {
       encodeUnwrapped
   }
 
-  final case class PhoneNumberDto(value: String) extends AnyVal
-  object PhoneNumberDto {
-    implicit val phoneNumberDtoEncoder: Encoder[PhoneNumberDto] =
-      encodeUnwrapped
+  final case class NumberDto(value: String) extends AnyVal
+  object NumberDto {
+    implicit val numberDtoEncoder: Encoder[NumberDto] = encodeUnwrapped
+    implicit val numberDtoDecoder: Decoder[NumberDto] = decodeUnwrapped
+
   }
 
   final case class FirstNameDto(value: String) extends AnyVal
   object FirstNameDto {
     implicit val firstNameDtoEncoder: Encoder[FirstNameDto] = encodeUnwrapped
+    implicit val firstNameDtoDecoder: Decoder[FirstNameDto] = decodeUnwrapped
   }
 
   final case class LastNameDto(value: String) extends AnyVal
+
   object LastNameDto {
-    implicit val firstNameDtoEncoder: Encoder[FirstNameDto] = encodeUnwrapped
+    implicit val lastNameDtoEncoder: Encoder[LastNameDto] = encodeUnwrapped
+    implicit val lastNameDtoDecoder: Decoder[LastNameDto] = decodeUnwrapped
+
+    def validate(value: LastNameDto): ValidationResults =
+      Option(value.value).filter(_.nonNullOrEmpty) match {
+        case None =>
+          "last name cannot be null or empty".invalidNel.pure[NonEmptyList]
+        case Some(lastName) =>
+          NonEmptyList.of(
+            Validated.condNel(
+              lastName.length <= LastNameMaxLength,
+              (),
+              s"last name can have a max length of $LastNameMaxLength"
+            )
+          )
+      }
   }
 
-  final case class EmailWithIdDto(id: EmailIdDto, mail: EmailDto)
+  final case class EmailWithIdDto(id: EmailIdDto, mail: MailDto)
 
   final case class PhoneNumberWithIdDto(
       id: PhoneNumberIdDto,
-      number: PhoneNumberDto
+      number: NumberDto
   )
 
   final case class UserDto(
@@ -80,47 +103,112 @@ object Dto {
       phoneNumbers: List[PhoneNumberWithIdDto]
   )
 
+  object UserDto {
+    implicit def userDtoEntityEncoder[F[_]: Sync]: EntityEncoder[F, UserDto] =
+      jsonEncoderOf
+
+    implicit final class UserExtensions(val value: User) extends AnyVal {
+      def toDto: UserDto = {
+        import value._
+
+        UserDto(
+          UserIdDto(id.value),
+          FirstNameDto(firstName.value),
+          LastNameDto(lastName.value),
+          emails.map(e =>
+            EmailWithIdDto(EmailIdDto(e.id.value), MailDto(e.mail.value))
+          ),
+          phoneNumbers.map(p =>
+            PhoneNumberWithIdDto(
+              PhoneNumberIdDto(p.id.value),
+              NumberDto(p.number.value)
+            )
+          )
+        )
+      }
+    }
+  }
+
   final case class NewUserDto(
-      id: UserIdDto,
       firstName: FirstNameDto,
-      lastName: LastNameDto,
-      emails: List[EmailDto],
-      phoneNumbers: List[PhoneNumberDto]
+      lastName: Option[LastNameDto],
+      emails: List[MailDto],
+      phoneNumbers: List[NumberDto]
   )
 
   object NewUserDto {
+    private final case class NewUserDtoRequired(
+        firstName: FirstNameDto,
+        lastName: LastNameDto,
+        emails: List[MailDto],
+        phoneNumbers: List[NumberDto]
+    )
+
+    implicit val newUserDtoDecoder: Decoder[NewUserDto] = deriveDecoder
+
     implicit final class NewUserDtoExtensions(val value: NewUserDto)
         extends AnyVal {
-
-      def validateF[F[_]](implicit S: Sync[F]): F[Unit] =
+      def toDomainF[F[_]: Sync]: F[NewUser] =
         for {
-          _ <- validateUserNullFieldsF(value)
-        } yield ()
-      private def validateUserNullFieldsF[F[_]](
-          value: NewUserDto
-      )(implicit S: Sync[F]): F[Unit] = {
-        def validateField[A](
-            value: A,
-            name: String
-        ): ValidationResult =
-          Validated.condNel(
-            Option(value).isDefined,
-            (),
-            s"$name cannot be null"
+          _ <- validateNullabilityF
+          domain <- toValidatedDomainF
+        } yield  domain
+
+      private def validateNullabilityF[F[_]](implicit S: Sync[F]): F[Unit] =
+        NonEmptyList
+          .of(
+            Validated.condNel(
+              value.lastName.isDefined,
+              (),
+              "last name must be present and not null"
+            )
           )
-
-        val validatedNel: ValidationResults = NonEmptyList.of(
-          validateField(value.id, "id"),
-          validateField(value.firstName, "firstName"),
-          validateField(value.lastName, "lastName"),
-          validateField(value.emails, "emails"),
-          validateField(value.phoneNumbers, "phoneNumbers")
-        )
-
-        validatedNel.combineAll match {
+          .combineAll match {
           case Valid(_) => S.unit
           case Invalid(errors) =>
-            S.raiseError(NewUserDtoValidationError(value, errors))
+            S.raiseError(NewUserDtoValidationError(errors))
+        }
+
+      private def toValidatedDomainF[F[_]: Sync]: F[NewUser] = {
+        val S = Sync[F]
+
+        val mapToRequired: F[NewUserDtoRequired] = (for {
+          lastNameDto <- value.lastName
+        } yield NewUserDtoRequired(
+          value.firstName,
+          lastNameDto,
+          value.emails,
+          value.phoneNumbers
+        ).pure[F])
+          .getOrElse(
+            S.raiseError(InternalError("nullability check not performed"))
+          )
+
+        for {
+          newUserDtoRequired <- mapToRequired
+          _ <- validateRequired(newUserDtoRequired)
+        } yield {
+          import newUserDtoRequired._
+
+          NewUser(
+            FirstName(firstName.value),
+            LastName(lastName.value),
+            emails.map(e => Mail(e.value)),
+            phoneNumbers.map(p => Number(p.value))
+          )
+        }
+      }
+
+      private def validateRequired[F[_]: Sync](
+          newUser: NewUserDtoRequired
+      ): F[Unit] = {
+        val S = Sync[F]
+        val validationResults = LastNameDto.validate(newUser.lastName)
+
+        validationResults.combineAll match {
+          case Valid(_) => S.unit
+          case Invalid(errors) =>
+            S.raiseError(NewUserDtoValidationError(errors))
         }
       }
     }
