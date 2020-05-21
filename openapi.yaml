@@ -91,8 +91,6 @@ paths:
       responses:
         '200':
           description: user has been deleted
-        '400':
-          description: user id validation error.
         '404':
           description: user not found for the given user id
 
@@ -117,11 +115,11 @@ paths:
         '400':
           description: request validation error. check response for details.
         '409':
-          description: email with the given id already exists for the user
+          description: there are already to many emails for the user
 
   /users/{userId}/emails/{emailId}:
     patch:
-      summary: modifies an existing email of a given user
+      summary: modifies an email of a user
       parameters:
         - in: path
           name: userId
@@ -152,6 +150,38 @@ paths:
           description: request validation error. check response for details.
         '404':
           description: email not found for user for the given email id
+    delete:
+      summary: deletes an email from an user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            $ref: '#/components/schemas/UserId'
+        - in: path
+          name: emailId
+          required: true
+          schema:
+            $ref: '#/components/schemas/EmailId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mail'
+      responses:
+        '200':
+          description: email has been deleted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MailModificationResult'
+        '400':
+          description: request validation error. check response for details.
+        '404':
+          description: email not found for user
 
   /users/{userId}/phoneNumbers:
     post:
@@ -173,12 +203,10 @@ paths:
           description: phone number has been added
         '400':
           description: request validation error. check response for details.
-        '409':
-          description: phone number with the given id already exists for the user
 
   /users/{userId}/phoneNumbers/{phoneNumberId}:
     patch:
-      summary: modifies an existing phone number of a given user
+      summary: modifies a phone number of an user
       parameters:
         - in: path
           name: userId
@@ -198,7 +226,7 @@ paths:
               $ref: '#/components/schemas/Number'
       responses:
         '200':
-          description: email has been modified
+          description: number has been modified
           content:
             application/json:
               schema:
@@ -209,6 +237,38 @@ paths:
           description: request validation error. check response for details.
         '404':
           description: phone number not found for user for the given phone number id
+    delete:
+      summary: deletes a phone number from an user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            $ref: '#/components/schemas/UserId'
+        - in: path
+          name: phoneNumberId
+          required: true
+          schema:
+            $ref: '#/components/schemas/PhoneNumberId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Number'
+      responses:
+        '200':
+          description: number has been deleted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NumberModificationResult'
+        '400':
+          description: request validation error. check response for details.
+        '404':
+          description: phone number not found for user
 
 components:
   schemas:
