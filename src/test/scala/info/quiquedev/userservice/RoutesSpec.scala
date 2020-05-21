@@ -835,6 +835,48 @@ class RoutesSpec
           "lastName can have a max length of 500"
         )
       }
+
+      "return 400 if search limit is too small" in new TestEnvironment {
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri =
+                  uri"/users?firstName=enrique&lastName=molina&searchLimit=-1"
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "searchLimit must be between 1 and 100"
+        )
+      }
+
+      "return 400 if search limit is too big" in new TestEnvironment {
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri =
+                  uri"/users?firstName=enrique&lastName=molina&searchLimit=1000"
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "searchLimit must be between 1 and 100"
+        )
+      }
     }
   }
 }

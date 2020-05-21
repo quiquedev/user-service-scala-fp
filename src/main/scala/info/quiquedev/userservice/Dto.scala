@@ -24,8 +24,8 @@ object Dto {
   private val MaxMails = 10
   private val PhoneNumberMaxLength = 500
   private val MaxNumbers = 10
-  private val MaxUsersToFind = 100
-  private val DefaultMaxUserToFind = 10
+  private val MaxSearchLimit = 100
+  private val DefaultSearchLimit = 10
 
   sealed trait UserUsecasesError extends RuntimeException
   final case class InternalError(msg: String) extends RuntimeException
@@ -151,16 +151,16 @@ object Dto {
     private def validate(value: SearchLimitDto): ValidationResults =
       NonEmptyList.of(
         Validated.condNel(
-          value.value >= 1 && value.value <= MaxUsersToFind,
+          value.value >= 1 && value.value <= MaxSearchLimit,
           (),
-          s"searchLimit must be between 1 and $MaxUsersToFind"
+          s"searchLimit must be between 1 and $MaxSearchLimit"
         )
       )
 
     def toDomainF[F[_]](
         value: Option[SearchLimitDto]
     )(implicit S: Sync[F]): F[SearchLimit] = value match {
-      case None => SearchLimit(DefaultMaxUserToFind).pure[F]
+      case None => SearchLimit(DefaultSearchLimit).pure[F]
       case Some(number) =>
         validate(number).combineAll match {
           case Valid(_) => SearchLimit(number.value).pure[F]
