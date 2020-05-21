@@ -31,6 +31,8 @@ import org.http4s.circe._
 import io.circe.syntax._
 import io.circe._
 import io.circe.generic.semiauto._
+import org.http4s._
+import org.http4s.implicits._
 
 class RoutesSpec
     extends AnyWordSpec
@@ -80,7 +82,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(
                 parse(requestBody)
                   .getOrElse(fail("request body is not a valid json"))
@@ -103,7 +105,9 @@ class RoutesSpec
         verifyJsonResponse(
           response,
           201,
-          parse(expectedResponseBody).getOrElse(fail("expected response body is not a valid json"))
+          parse(expectedResponseBody).getOrElse(
+            fail("expected response body is not a valid json")
+          )
         )
       }
 
@@ -123,7 +127,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -153,7 +157,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -183,7 +187,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -214,7 +218,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -243,7 +247,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -273,7 +277,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -303,7 +307,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -334,7 +338,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -362,7 +366,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -387,7 +391,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -412,7 +416,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -438,7 +442,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -466,7 +470,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -494,7 +498,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -523,7 +527,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -552,7 +556,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -578,7 +582,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -610,7 +614,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -638,7 +642,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.POST,
-                uri = uri("/users")
+                uri = uri"/users"
               ).withEntity(parse(requestBody).getOrElse(fail()))
             )
             .value
@@ -715,6 +719,120 @@ class RoutesSpec
           parse(expectedResponseBody).getOrElse(
             fail("expected response body is not a valid json")
           )
+        )
+      }
+
+      "return 200 and no users if search didn't find anything" in new TestEnvironment {
+        val firstName = FirstName("enrique")
+        val lastName = LastName("molina")
+
+        when(usecases.findUsersByName(firstName, lastName, SearchLimit(10))) thenReturn List()
+          .pure[IO]
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = uri"/users?firstName=enrique&lastName=molina"
+              )
+            )
+            .value
+
+        // then
+        val expectedResponseBody = """
+        {
+          "users": []
+        }
+        """
+
+        verifyJsonResponse(
+          response,
+          200,
+          parse(expectedResponseBody).getOrElse(
+            fail("expected response body is not a valid json")
+          )
+        )
+      }
+
+      "return 400 if first name is empty" in new TestEnvironment {
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = uri"/users?firstName=&lastName=molina"
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(response, 400, "firstName cannot be empty")
+      }
+
+      "return 400 if first name is too long" in new TestEnvironment {
+        // given
+        val longFirstName = "a" * 1000
+        val uriString = s"/users?firstName=$longFirstName&lastName=molina"
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = Uri.fromString(uriString).getOrElse(fail("wrong uri"))
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "firstName can have a max length of 500"
+        )
+      }
+
+      "return 400 if last name is empty" in new TestEnvironment {
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = uri("/users?firstName=enrique&lastName=")
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(response, 400, "lastName cannot be empty")
+      }
+
+      "return 400 if last name is too long" in new TestEnvironment {
+        // given
+        val longLastName = "a" * 1000
+        val uriString = s"/users?firstName=enrique&lastName=$longLastName"
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = Uri.fromString(uriString).getOrElse(fail("wrong uri"))
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "lastName can have a max length of 500"
         )
       }
     }
