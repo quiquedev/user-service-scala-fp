@@ -12,7 +12,6 @@ import Dto.UserDto._
 import Dto.NewUserDto
 import Dto.NewUserDto._
 import info.quiquedev.userservice.Dto.NewUserDtoValidationError
-import org.http4s.circe.CirceEntityCodec._
 
 object Routes {
   private def health[F[_]: Sync]: HttpRoutes[F] = {
@@ -35,12 +34,16 @@ object Routes {
 
     HttpRoutes.of[F] {
       case req @ POST -> Root / "users" =>
-        for {
+        (for {
           newUserDto <- req.as[NewUserDto]
           newUser <- newUserDto.toDomainF
           createdUser <- createUser(newUser)
           response <- Created(createdUser.toDto)
-        } yield response
+        } yield response).recoverWith {
+          case NewUserDtoValidationError(errors) => {
+val e = errors.toList.mkString(",")
+            BadRequest(errors.toList.mkString(","))}
+        }
     }
   }
 

@@ -144,7 +144,8 @@ object Dto {
         phoneNumbers: List[NumberDto]
     )
 
-    implicit val newUserDtoDecoder: Decoder[NewUserDto] = deriveDecoder
+    implicit def newUserDtoEntityDecoder[F[_]: Sync]
+        : EntityDecoder[F, NewUserDto] = jsonOf
 
     implicit final class NewUserDtoExtensions(val value: NewUserDto)
         extends AnyVal {
@@ -152,7 +153,7 @@ object Dto {
         for {
           _ <- validateNullabilityF
           domain <- toValidatedDomainF
-        } yield  domain
+        } yield domain
 
       private def validateNullabilityF[F[_]](implicit S: Sync[F]): F[Unit] =
         NonEmptyList

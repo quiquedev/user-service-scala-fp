@@ -99,6 +99,35 @@ class RoutesSpec
         verifyJsonResponse(response, 201, parse(responseBody).getOrElse(fail()))
       }
 
+      "return 400 if the user last name is not present" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "firstName": "enrique",
+          "emails": ["emolina@gmail.com"],
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "last name must be present and not null"
+        )
+      }
+
       "return 400 if the user last name is null" in new TestEnvironment {
         // given
         val requestBody = """
@@ -110,35 +139,36 @@ class RoutesSpec
         }
         """
 
-        println(parse(requestBody).getOrElse(fail()).as[NewUserDto])
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
 
-        // // when
-        // val response =
-        //   routes
-        //     .run(
-        //       Request[IO](
-        //         method = Method.POST,
-        //         uri = uri("/users")
-        //       ).withEntity(parse(requestBody).getOrElse(fail()))
-        //     )
-        //     .value
-
-        // // then
-        // verifyTextResponse(
-        //   response,
-        //   400,
-        //   "last name cannot be null or empty"
-        // )
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "last name must be present and not null"
+        )
       }
       "return 400 if the user last name is empty" in new TestEnvironment {}
       "return 400 if the user last name too big" in new TestEnvironment {}
+      "return 400 if the user first name is not present" in new TestEnvironment {}
       "return 400 if the user first name is null" in new TestEnvironment {}
       "return 400 if the user first name is empty" in new TestEnvironment {}
       "return 400 if the user first name is too big" in new TestEnvironment {}
+      "return 400 if the email list is not present" in new TestEnvironment {}
       "return 400 if the email list is null" in new TestEnvironment {}
       "return 400 if the email list is empty" in new TestEnvironment {}
       "return 400 if the email list is too big" in new TestEnvironment {}
       "return 400 if the email list contains invalid emails" in new TestEnvironment {}
+      "return 400 if the phone number list is not present" in new TestEnvironment {}
       "return 400 if the phone number list is null" in new TestEnvironment {}
       "return 400 if the phone number list is empty" in new TestEnvironment {}
       "return 400 if the phone number list is too big" in new TestEnvironment {}
