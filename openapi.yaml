@@ -405,10 +405,10 @@ components:
           minItems: 1
           maxItems: 10
           items:
-            $ref: '#/components/schemas/Email'
+            $ref: '#/components/schemas/Mail'
         phoneNumbers:
           type: array
           minItems: 1
           maxItems: 10
           items:
-            $ref: '#/components/schemas/PhoneNumber'
+            $ref: '#/components/schemas/Number'
