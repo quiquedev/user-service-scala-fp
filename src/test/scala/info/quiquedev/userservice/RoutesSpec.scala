@@ -603,6 +603,35 @@ class RoutesSpec
           s"number '$longNumber' is too long (max length 500)"
         )
       }
+
+      "return 400 if more than one validation fails" in new TestEnvironment {
+        // given
+        val requestBody =
+          s"""
+          {
+            "emails": ["1"],
+            "phoneNumbers": ["1"]
+          }
+          """
+
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          s"lastName must be present and not null,firstName must be present and not null"
+        )
+      }
+ 
     }
 
   }
