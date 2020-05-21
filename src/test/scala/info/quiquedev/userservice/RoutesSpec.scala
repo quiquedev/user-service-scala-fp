@@ -60,8 +60,8 @@ class RoutesSpec
         val newUser = NewUser(
           FirstName("enrique"),
           LastName("molina"),
-          List(Mail("emolina@gmail.com")),
-          List(Number("12345"))
+          Set(Mail("emolina@gmail.com")),
+          Set(Number("12345"))
         )
 
         val user = User(
@@ -89,8 +89,8 @@ class RoutesSpec
         val responseBody = """
         {
           "id": 1,
-          "firstName": "enrique",
           "lastName": "molina",
+          "firstName": "enrique",
           "emails": [{"id": 1, "mail": "emolina@gmail.com"}],
           "phoneNumbers": [{"id": 1, "number": "12345"}]
         }
@@ -124,7 +124,7 @@ class RoutesSpec
         verifyTextResponse(
           response,
           400,
-          "last name must be present and not null"
+          "lastName must be present and not null"
         )
       }
 
@@ -132,8 +132,8 @@ class RoutesSpec
         // given
         val requestBody = """
         {
-          "firstName": "enrique",
           "lastName": null,
+          "firstName": "enrique",
           "emails": ["emolina@gmail.com"],
           "phoneNumbers": ["12345"]
         }
@@ -154,16 +154,214 @@ class RoutesSpec
         verifyTextResponse(
           response,
           400,
-          "last name must be present and not null"
+          "lastName must be present and not null"
         )
       }
-      "return 400 if the user last name is empty" in new TestEnvironment {}
-      "return 400 if the user last name too big" in new TestEnvironment {}
-      "return 400 if the user first name is not present" in new TestEnvironment {}
-      "return 400 if the user first name is null" in new TestEnvironment {}
-      "return 400 if the user first name is empty" in new TestEnvironment {}
-      "return 400 if the user first name is too big" in new TestEnvironment {}
-      "return 400 if the email list is not present" in new TestEnvironment {}
+
+      "return 400 if the user last name is empty" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "lastName": " ",
+          "firstName": "enrique",
+          "emails": ["emolina@gmail.com"],
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "lastName cannot be empty"
+        )
+
+      }
+
+      "return 400 if the user last name is too long" in new TestEnvironment {
+        // given
+        val requestBody = s"""
+        {
+          "lastName": "${"a" * 501}",
+          "firstName": "enrique",
+          "emails": ["emolina@gmail.com"],
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "lastName can have a max length of 500"
+        )
+      }
+
+      "return 400 if the user first name is not present" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "lastName": "molina",
+          "emails": ["emolina@gmail.com"],
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "firstName must be present and not null"
+        )
+      }
+
+      "return 400 if the user first name is null" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "lastName": "molina",
+          "firstName": null,
+          "emails": ["emolina@gmail.com"],
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "firstName must be present and not null"
+        )
+      }
+
+      "return 400 if the user first name is empty" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "firstName": " ",
+          "lastName": "molina",
+          "emails": ["emolina@gmail.com"],
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "firstName cannot be empty"
+        )
+
+      }
+
+      "return 400 if the user first name is too long" in new TestEnvironment {
+        // given
+        val requestBody = s"""
+        {
+          "firstName": "${"a" * 501}",
+          "lastName": "moline",
+          "emails": ["emolina@gmail.com"],
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(
+          response,
+          400,
+          "firstName can have a max length of 500"
+        )
+      }
+
+      "return 400 if the email list is not present" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "firstName": "enrique",
+          "lastName": "molina",
+          "phoneNumbers": ["12345"]
+        }
+        """
+
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri("/users")
+              ).withEntity(parse(requestBody).getOrElse(fail()))
+            )
+            .value
+
+        // then
+        verifyTextResponse(response, 400, "emails must be present and not null")
+      }
       "return 400 if the email list is null" in new TestEnvironment {}
       "return 400 if the email list is empty" in new TestEnvironment {}
       "return 400 if the email list is too big" in new TestEnvironment {}

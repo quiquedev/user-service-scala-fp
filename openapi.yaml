@@ -219,7 +219,6 @@ components:
 
     Mail:
      type: string
-     format: email
      minimum: 1
      maximum: 500
 

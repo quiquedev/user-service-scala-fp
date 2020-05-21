@@ -23,7 +23,8 @@ object Dto {
 
   private val FirstNameMaxLength = 500
   private val LastNameMaxLength = 500
-  private val EmailMaxLength = 500
+  private val MailMaxLength = 500
+  private val MaxMails = 10
   private val PhoneNumberMaxLength = 500
 
   sealed trait UserUsecasesError extends RuntimeException
@@ -46,6 +47,20 @@ object Dto {
   object MailDto {
     implicit val mailDtoEncoder: Encoder[MailDto] = encodeUnwrapped
     implicit val mailDtoDecoder: Decoder[MailDto] = decodeUnwrapped
+
+    def validate(value: MailDto): ValidationResults =
+      Option(value.value).filter(_.nonNullOrEmpty) match {
+        case None =>
+          "mail cannot be empty".invalidNel.pure[NonEmptyList]
+        case Some(lastName) =>
+          NonEmptyList.of(
+            Validated.condNel(
+              lastName.length <= LastNameMaxLength,
+              (),
+              s"mail can have a max length of $MailMaxLength"
+            )
+          )
+      }
   }
 
   final case class PhoneNumberIdDto(value: Int) extends AnyVal
@@ -65,6 +80,20 @@ object Dto {
   object FirstNameDto {
     implicit val firstNameDtoEncoder: Encoder[FirstNameDto] = encodeUnwrapped
     implicit val firstNameDtoDecoder: Decoder[FirstNameDto] = decodeUnwrapped
+
+    def validate(value: FirstNameDto): ValidationResults =
+      Option(value.value).filter(_.nonNullOrEmpty) match {
+        case None =>
+          "firstName cannot be empty".invalidNel.pure[NonEmptyList]
+        case Some(lastName) =>
+          NonEmptyList.of(
+            Validated.condNel(
+              lastName.length <= LastNameMaxLength,
+              (),
+              s"firstName can have a max length of $FirstNameMaxLength"
+            )
+          )
+      }
   }
 
   final case class LastNameDto(value: String) extends AnyVal
@@ -76,13 +105,13 @@ object Dto {
     def validate(value: LastNameDto): ValidationResults =
       Option(value.value).filter(_.nonNullOrEmpty) match {
         case None =>
-          "last name cannot be null or empty".invalidNel.pure[NonEmptyList]
+          "lastName cannot be empty".invalidNel.pure[NonEmptyList]
         case Some(lastName) =>
           NonEmptyList.of(
             Validated.condNel(
               lastName.length <= LastNameMaxLength,
               (),
-              s"last name can have a max length of $LastNameMaxLength"
+              s"lastName can have a max length of $LastNameMaxLength"
             )
           )
       }
@@ -130,18 +159,18 @@ object Dto {
   }
 
   final case class NewUserDto(
-      firstName: FirstNameDto,
+      firstName: Option[FirstNameDto],
       lastName: Option[LastNameDto],
-      emails: List[MailDto],
-      phoneNumbers: List[NumberDto]
+      emails: Option[Set[MailDto]],
+      phoneNumbers: Set[NumberDto]
   )
 
   object NewUserDto {
     private final case class NewUserDtoRequired(
         firstName: FirstNameDto,
         lastName: LastNameDto,
-        emails: List[MailDto],
-        phoneNumbers: List[NumberDto]
+        emails: Set[MailDto],
+        phoneNumbers: Set[NumberDto]
     )
 
     implicit def newUserDtoEntityDecoder[F[_]: Sync]
@@ -155,14 +184,18 @@ object Dto {
           domain <- toValidatedDomainF
         } yield domain
 
-      private def validateNullabilityF[F[_]](implicit S: Sync[F]): F[Unit] =
+      private def validateNullabilityF[F[_]](implicit S: Sync[F]): F[Unit] = {
+        def validateField[A](field: Option[A], name: String): ValidationResult =
+          Validated.condNel(
+            field.isDefined,
+            (),
+            s"$name must be present and not null"
+          )
         NonEmptyList
           .of(
-            Validated.condNel(
-              value.lastName.isDefined,
-              (),
-              "last name must be present and not null"
-            )
+            validateField(value.lastName, "lastName"),
+            validateField(value.firstName, "firstName"),
+            validateField(value.emails, "emails"),
           )
           .combineAll match {
           case Valid(_) => S.unit
@@ -170,15 +203,18 @@ object Dto {
             S.raiseError(NewUserDtoValidationError(errors))
         }
 
+      }
       private def toValidatedDomainF[F[_]: Sync]: F[NewUser] = {
         val S = Sync[F]
 
         val mapToRequired: F[NewUserDtoRequired] = (for {
           lastNameDto <- value.lastName
+          firstNameDto <- value.firstName
+          emailsDto <- value.emails
         } yield NewUserDtoRequired(
-          value.firstName,
+          firstNameDto,
           lastNameDto,
-          value.emails,
+          emailsDto,
           value.phoneNumbers
         ).pure[F])
           .getOrElse(
@@ -204,7 +240,18 @@ object Dto {
           newUser: NewUserDtoRequired
       ): F[Unit] = {
         val S = Sync[F]
-        val validationResults = LastNameDto.validate(newUser.lastName)
+        val emailValidations = NonEmptyList.of(
+          Validated.condNel(
+            newUser.emails.size <= MaxMails,
+            (),
+            s"emails can have a max size of $MaxMails"
+          )
+        ) ++ newUser.emails.toList.flatMap(e => MailDto.validate(e).toList)
+
+        val validationResults =
+          LastNameDto.validate(newUser.lastName) ::: FirstNameDto.validate(
+            newUser.firstName
+          ) ::: emailValidations
 
         validationResults.combineAll match {
           case Valid(_) => S.unit

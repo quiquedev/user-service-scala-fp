@@ -74,8 +74,8 @@ object Domain {
   final case class NewUser(
       firstName: FirstName,
       lastName: LastName,
-      emails: List[Mail],
-      phoneNumbers: List[Number]
+      emails: Set[Mail],
+      phoneNumbers: Set[Number]
   )
 
 }
