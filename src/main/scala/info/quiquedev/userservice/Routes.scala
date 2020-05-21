@@ -55,13 +55,16 @@ object Routes {
       case GET -> Root / "users" :? FirstNameDtoParamMatcher(firstNameDto) :? LastNameDtoParamMatcher(
             lastNameDto
           ) :? SearchLimitDtoOptionalParamMatcher(searchLimitDto) => {
-        for {
+        (for {
           searchLimit <- SearchLimitDto.toDomainF(searchLimitDto)
           firstName <- FirstNameDto.toDomainF(firstNameDto)
           lastName <- LastNameDto.toDomainF(lastNameDto)
-          users <- findUserByName(firstName, lastName, searchLimit)
-          response <- Ok(users.map(_.toDto))
-        } yield response
+          users <- findUsersByName(firstName, lastName, searchLimit)
+          response <- Ok(UsersDto(users.map(_.toDto)))
+        } yield response).recoverWith {
+          case QueryParamValidationError(errors) =>
+            BadRequest(errors.toList.mkString("|"))
+        }
       }
     }
   }
@@ -75,6 +78,9 @@ private object Codec {
 
   implicit def userDtoListEntityEncoder[F[_]: Sync]
       : EntityEncoder[F, List[UserDto]] = jsonEncoderOf
+
+  implicit def usersDtoEntityEncoder[F[_]: Sync]: EntityEncoder[F, UsersDto] =
+    jsonEncoderOf
 
   implicit def newUserDtoEntityDecoder[F[_]: Sync]
       : EntityDecoder[F, NewUserDto] = jsonOf

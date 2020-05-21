@@ -124,7 +124,7 @@ object Dto {
   object LastNameDto {
     implicit val lastNameDtoEncoder: Encoder[LastNameDto] = encodeUnwrapped
     implicit val lastNameDtoDecoder: Decoder[LastNameDto] = decodeUnwrapped
-    
+
     def validate(value: LastNameDto): ValidationResults =
       Option(value.value).filter(_.nonNullOrEmpty) match {
         case None =>
@@ -186,7 +186,7 @@ object Dto {
   )
 
   object UserDto {
-       implicit final class UserExtensions(val value: User) extends AnyVal {
+    implicit final class UserExtensions(val value: User) extends AnyVal {
       def toDto: UserDto = {
         import value._
 
@@ -208,6 +208,8 @@ object Dto {
     }
   }
 
+  final case class UsersDto(users: List[UserDto])
+
   final case class NewUserDto(
       firstName: Option[FirstNameDto],
       lastName: Option[LastNameDto],
@@ -223,7 +225,7 @@ object Dto {
         phoneNumbers: Set[NumberDto]
     )
 
-        implicit final class NewUserDtoExtensions(val value: NewUserDto)
+    implicit final class NewUserDtoExtensions(val value: NewUserDto)
         extends AnyVal {
       def toDomainF[F[_]: Sync]: F[NewUser] =
         for {

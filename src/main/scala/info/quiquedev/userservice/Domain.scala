@@ -63,7 +63,7 @@ object Domain {
 
   final case class Email(id: EmailId, mail: Mail)
 
-  final case class PhoneNumber(id: EmailId, number: Number)
+  final case class PhoneNumber(id: PhoneNumberId, number: Number)
 
   final case class User(
       id: UserId,

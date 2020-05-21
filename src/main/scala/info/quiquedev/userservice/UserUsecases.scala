@@ -13,7 +13,7 @@ import Dto._
 trait UserUsecases[F[_]] {
   def createUser(newUser: NewUser): F[User]
   def findUserById(userId: UserId): F[Option[User]]
-  def findUserByName(
+  def findUsersByName(
       firstName: FirstName,
       lastName: LastName,
       searchLimit: SearchLimit

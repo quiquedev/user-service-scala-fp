@@ -69,7 +69,7 @@ class RoutesSpec
           FirstName("enrique"),
           LastName("molina"),
           List(Email(EmailId(1), Mail("emolina@gmail.com"))),
-          List(PhoneNumber(EmailId(1), Number("12345")))
+          List(PhoneNumber(PhoneNumberId(1), Number("12345")))
         )
 
         when(usecases.createUser(newUser)) thenReturn user.pure[IO]
@@ -81,12 +81,16 @@ class RoutesSpec
               Request[IO](
                 method = Method.POST,
                 uri = uri("/users")
-              ).withEntity(parse(requestBody).getOrElse(fail()))
+              ).withEntity(
+                parse(requestBody)
+                  .getOrElse(fail("request body is not a valid json"))
+              )
             )
             .value
 
         // then
-        val responseBody = """
+        val expectedResponseBody =
+          """
         {
           "id": 1,
           "lastName": "molina",
@@ -96,7 +100,11 @@ class RoutesSpec
         }
         """
 
-        verifyJsonResponse(response, 201, parse(responseBody).getOrElse(fail()))
+        verifyJsonResponse(
+          response,
+          201,
+          parse(expectedResponseBody).getOrElse(fail("expected response body is not a valid json"))
+        )
       }
 
       "return 400 if the user last name is not present" in new TestEnvironment {
@@ -467,7 +475,6 @@ class RoutesSpec
         verifyTextResponse(
           response,
           400,
-
           s"mail '$longEmail' is too long (max length 500)"
         )
       }
@@ -493,7 +500,11 @@ class RoutesSpec
             .value
 
         // then
-        verifyTextResponse(response, 400, "phoneNumbers must be present and not null")
+        verifyTextResponse(
+          response,
+          400,
+          "phoneNumbers must be present and not null"
+        )
       }
 
       "return 400 if the phone number list is null" in new TestEnvironment {
@@ -518,7 +529,11 @@ class RoutesSpec
             .value
 
         // then
-        verifyTextResponse(response, 400, "phoneNumbers must be present and not null")
+        verifyTextResponse(
+          response,
+          400,
+          "phoneNumbers must be present and not null"
+        )
       }
 
       "return 400 if the phone number list is empty" in new TestEnvironment {
@@ -569,7 +584,11 @@ class RoutesSpec
             .value
 
         // then
-        verifyTextResponse(response, 400, "phoneNumbers can have a max size of 10")
+        verifyTextResponse(
+          response,
+          400,
+          "phoneNumbers can have a max size of 10"
+        )
       }
 
       "return 400 if the phone number list contains too long emails" in new TestEnvironment {
@@ -631,8 +650,73 @@ class RoutesSpec
           s"lastName must be present and not null,firstName must be present and not null"
         )
       }
- 
     }
+    "support GET request to find users by name" which {
+      "return 200 and the found users" in new TestEnvironment {
+        val firstName = FirstName("enrique")
+        val lastName = LastName("molina")
 
+        val usersFound = List(
+          User(
+            UserId(1),
+            FirstName("enrique"),
+            LastName("molina"),
+            List(Email(EmailId(1), Mail("1"))),
+            List(PhoneNumber(PhoneNumberId(1), Number("1")))
+          ),
+          User(
+            UserId(2),
+            FirstName("enrique"),
+            LastName("molina"),
+            List(Email(EmailId(1), Mail("2"))),
+            List(PhoneNumber(PhoneNumberId(1), Number("6")))
+          )
+        )
+
+        when(usecases.findUsersByName(firstName, lastName, SearchLimit(10))) thenReturn usersFound
+          .pure[IO]
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.GET,
+                uri = uri("/users?firstName=enrique&lastName=molina")
+              )
+            )
+            .value
+
+        // then
+        val expectedResponseBody = """
+        {
+          "users": [
+            {
+              "id": 1,
+              "lastName": "molina",
+              "firstName": "enrique",
+              "emails": [{"id": 1, "mail": "1"}],
+              "phoneNumbers": [{"id": 1, "number": "1"}]
+            },
+            {
+              "id": 2,
+              "lastName": "molina",
+              "firstName": "enrique",
+              "emails": [{"id": 1, "mail": "2"}],
+              "phoneNumbers": [{"id": 1, "number": "6"}]
+            }
+          ]
+        }
+        """
+
+        verifyJsonResponse(
+          response,
+          200,
+          parse(expectedResponseBody).getOrElse(
+            fail("expected response body is not a valid json")
+          )
+        )
+      }
+    }
   }
 }
