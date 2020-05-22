@@ -33,7 +33,7 @@ object UserRoutes {
   def value[F[_]: Sync: UserUsecases]: HttpRoutes[F] = {
     val U = UserUsecases[F]
     val dsl = new Http4sDsl[F] {}
-    
+
     import UserDto._
     import dsl._
     import U._
@@ -79,7 +79,7 @@ object UserRoutes {
         (for {
           newMailDto <- req.as[NewMailDto]
           mail <- newMailDto.toDomainF
-          updatedUser <- addEmailToUser(UserId(userId), mail)
+          updatedUser <- addMailToUser(UserId(userId), mail)
           response <- Created(updatedUser.toDto)
         } yield response).recoverWith {
           case RequestBodyValidationError(errors) =>
@@ -93,7 +93,7 @@ object UserRoutes {
         (for {
           newMailDto <- req.as[NewMailDto]
           mail <- newMailDto.toDomainF
-          updatedUser <- updateEmailFromUser(
+          updatedUser <- updateMailFromUser(
             UserId(userId),
             MailWithId(MailId(mailId), Mail(mail.value))
           )
@@ -108,7 +108,7 @@ object UserRoutes {
             mailId
           ) =>
         (for {
-          updatedUser <- deleteEmailFromUser(
+          updatedUser <- deleteMailFromUser(
             UserId(userId),
             MailId(mailId)
           )
@@ -126,7 +126,7 @@ object UserRoutes {
         } yield response).recoverWith {
           case RequestBodyValidationError(errors) =>
             BadRequest(errors.toList.mkString("|"))
-          case UserNotFoundError => NotFound()
+          case UserNotFoundError   => NotFound()
           case TooManyNumbersError => Conflict()
         }
       case req @ PUT -> Root / "users" / IntVar(userId) / "numbers" / IntVar(
@@ -144,7 +144,7 @@ object UserRoutes {
           case RequestBodyValidationError(errors) =>
             BadRequest(errors.toList.mkString("|"))
           case NumberNotFoundError => NotFound()
-          case UserNotFoundError => Gone()
+          case UserNotFoundError   => Gone()
         }
       case DELETE -> Root / "users" / IntVar(userId) / "numbers" / IntVar(
             numberId
@@ -157,9 +157,10 @@ object UserRoutes {
           response <- Ok(updatedUser.toDto)
         } yield response).recoverWith {
           case NumberNotFoundError => NotFound()
-          case UserNotFoundError => Gone()
+          case UserNotFoundError   => Gone()
         }
-    }  }
+    }
+  }
 }
 
 private object Codec {

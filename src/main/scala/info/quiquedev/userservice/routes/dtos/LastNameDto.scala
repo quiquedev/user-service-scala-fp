@@ -34,4 +34,4 @@ object LastNameDto {
       case Valid(_)        => LastName(value.value).pure[F]
       case Invalid(errors) => S.raiseError(QueryParamValidationError(errors))
     }
-  }
+}

@@ -129,7 +129,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: mailId 
+          name: mailId
           required: true
           schema:
             $ref: '#/components/schemas/MailId'
@@ -163,7 +163,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: mailId 
+          name: mailId
           required: true
           schema:
             $ref: '#/components/schemas/MailId'
@@ -212,7 +212,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: numberId 
+          name: numberId
           required: true
           schema:
             $ref: '#/components/schemas/NumberId'
@@ -246,7 +246,7 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: numberId 
+          name: numberId
           required: true
           schema:
             $ref: '#/components/schemas/NumberId'
@@ -273,9 +273,9 @@ components:
       format: int32
 
     Mail:
-     type: string
-     minimum: 1
-     maximum: 500
+      type: string
+      minimum: 1
+      maximum: 500
 
     MailWithId:
       type: object
@@ -290,7 +290,7 @@ components:
 
     MailModification:
       type: object
-      required: 
+      required:
         - value
       properties:
         value:
@@ -307,12 +307,12 @@ components:
 
     NumberModification:
       type: object
-      required: 
+      required:
         - value
       properties:
         value:
           $ref: '#/components/schemas/Number'
- 
+
     NumberWithId:
       type: object
       required:
@@ -329,14 +329,14 @@ components:
       format: int32
 
     LastName:
-       type: string
-       minimum: 1
-       maximum: 500
- 
+      type: string
+      minimum: 1
+      maximum: 500
+
     FirstName:
-       type: string
-       minimum: 1
-       maximum: 500
+      type: string
+      minimum: 1
+      maximum: 500
 
     User:
       type: object

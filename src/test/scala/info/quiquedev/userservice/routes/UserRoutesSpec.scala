@@ -46,8 +46,8 @@ class UserRoutesSpec
 
         val user = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
           List(NumberWithId(NumberId(1), Number("12345")))
         )
@@ -329,7 +329,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the email list is not present" in new TestEnvironment {
+      "return 400 if emails is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -353,7 +353,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails must be present and not null")
       }
 
-      "return 400 if the email list is null" in new TestEnvironment {
+      "return 400 if emails is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -378,7 +378,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails must be present and not null")
       }
 
-      "return 400 if the email list is empty" in new TestEnvironment {
+      "return 400 if emails is empty" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -403,7 +403,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails cannot be empty")
       }
 
-      "return 400 if the email list is too big" in new TestEnvironment {
+      "return 400 if emails is too big" in new TestEnvironment {
         // given
         val requestBody =
           """
@@ -429,7 +429,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails can have a max size of 10")
       }
 
-      "return 400 if the email list contains too long emails" in new TestEnvironment {
+      "return 400 if emails contains too long emails" in new TestEnvironment {
         // given
         val longEmail = "a" * 1000
 
@@ -461,7 +461,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the phone number list is not present" in new TestEnvironment {
+      "return 400 if phoneNumbers is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -489,7 +489,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the phone number list is null" in new TestEnvironment {
+      "return 400 if phoneNumbers is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -518,7 +518,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the phone number list is empty" in new TestEnvironment {
+      "return 400 if phoneNumbers is empty" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -543,7 +543,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "phoneNumbers cannot be empty")
       }
 
-      "return 400 if the phone number list is too big" in new TestEnvironment {
+      "return 400 if phoneNumbers is too big" in new TestEnvironment {
         // given
         val requestBody =
           """
@@ -573,7 +573,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the phone number list contains too long emails" in new TestEnvironment {
+      "return 400 if phoneNumbers contains too long mails" in new TestEnvironment {
         // given
         val longNumber = "1" * 1000
 
@@ -641,15 +641,15 @@ class UserRoutesSpec
         val usersFound = List(
           User(
             UserId(1),
-            FirstName("enrique"),
             LastName("molina"),
+            FirstName("enrique"),
             List(MailWithId(MailId(1), Mail("1"))),
             List(NumberWithId(NumberId(1), Number("1")))
           ),
           User(
             UserId(2),
-            FirstName("enrique"),
             LastName("molina"),
+            FirstName("enrique"),
             List(MailWithId(MailId(1), Mail("2"))),
             List(NumberWithId(NumberId(1), Number("6")))
           )
@@ -864,8 +864,8 @@ class UserRoutesSpec
         // given
         val user = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
           List(NumberWithId(NumberId(1), Number("12345")))
         )
@@ -973,8 +973,8 @@ class UserRoutesSpec
   }
 
   "/users/{userId}/mails" should {
-    "support POST request to add email to user" which {
-      "return 201 if the email has been added" in new TestEnvironment {
+    "support POST request to add mail to user" which {
+      "return 201 if the mail has been added" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -984,8 +984,8 @@ class UserRoutesSpec
 
         val updatedUser = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(
             MailWithId(MailId(0), Mail("emolina@yahoo.com")),
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
@@ -993,7 +993,7 @@ class UserRoutesSpec
           List(NumberWithId(NumberId(1), Number("12345")))
         )
 
-        when(usecases.addEmailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn updatedUser
+        when(usecases.addMailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn updatedUser
           .pure[IO]
 
         // when
@@ -1147,7 +1147,7 @@ class UserRoutesSpec
           }
           """
 
-        when(usecases.addEmailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn IO
+        when(usecases.addMailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn IO
           .raiseError(UserNotFoundError)
 
         // when
@@ -1176,7 +1176,7 @@ class UserRoutesSpec
           }
           """
 
-        when(usecases.addEmailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn IO
+        when(usecases.addMailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn IO
           .raiseError(TooManyMailsError)
 
         // when
@@ -1212,8 +1212,8 @@ class UserRoutesSpec
 
         val updatedUser = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(
             MailWithId(MailId(0), Mail("emolina@yahoo.com")),
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
@@ -1222,7 +1222,7 @@ class UserRoutesSpec
         )
 
         when(
-          usecases.updateEmailFromUser(
+          usecases.updateMailFromUser(
             UserId(1),
             MailWithId(MailId(1), Mail("enrique@gmail.com"))
           )
@@ -1381,7 +1381,7 @@ class UserRoutesSpec
           """
 
         when(
-          usecases.updateEmailFromUser(
+          usecases.updateMailFromUser(
             UserId(1),
             MailWithId(MailId(1), Mail("enrique@gmail.com"))
           )
@@ -1415,7 +1415,7 @@ class UserRoutesSpec
           """
 
         when(
-          usecases.updateEmailFromUser(
+          usecases.updateMailFromUser(
             UserId(1),
             MailWithId(MailId(1), Mail("enrique@gmail.com"))
           )
@@ -1446,13 +1446,13 @@ class UserRoutesSpec
         // given
         val updateUser = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
           List(NumberWithId(NumberId(1), Number("12345")))
         )
 
-        when(usecases.deleteEmailFromUser(UserId(1), MailId(2))) thenReturn updateUser
+        when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn updateUser
           .pure[IO]
         val response =
           routes
@@ -1487,7 +1487,7 @@ class UserRoutesSpec
 
       "return 404 if the mail does not exist" in new TestEnvironment {
         // given
-        when(usecases.deleteEmailFromUser(UserId(1), MailId(2))) thenReturn IO
+        when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn IO
           .raiseError(MailNotFoundError)
 
         val response =
@@ -1506,7 +1506,7 @@ class UserRoutesSpec
 
       "return 410 if the user does not exist" in new TestEnvironment {
         // given
-        when(usecases.deleteEmailFromUser(UserId(1), MailId(2))) thenReturn IO
+        when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn IO
           .raiseError(UserNotFoundError)
 
         val response =
@@ -1537,8 +1537,8 @@ class UserRoutesSpec
 
         val updatedUser = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
           ),
@@ -1767,8 +1767,8 @@ class UserRoutesSpec
 
         val updatedUser = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
           ),
@@ -2003,8 +2003,8 @@ class UserRoutesSpec
         // given
         val updateUser = User(
           UserId(1),
-          FirstName("enrique"),
           LastName("molina"),
+          FirstName("enrique"),
           List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
           List(NumberWithId(NumberId(1), Number("12345")))
         )

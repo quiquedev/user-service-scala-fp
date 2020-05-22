@@ -73,5 +73,6 @@ object DatabaseUtils {
   )
   private final case class Config(db: DatabaseConfig)
 
-  final case class ConfigurationLoadError(message: String) extends RuntimeException(message)
+  final case class ConfigurationLoadError(message: String)
+      extends RuntimeException(message)
 }

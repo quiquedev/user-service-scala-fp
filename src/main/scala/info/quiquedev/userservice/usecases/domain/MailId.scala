@@ -10,4 +10,3 @@ object MailId {
   implicit val mailIdEncoder: Encoder[MailId] = encodeUnwrapped
   implicit val mailIdDecoder: Decoder[MailId] = decodeUnwrapped
 }
-

@@ -19,8 +19,8 @@ object SearchLimitDto {
     )
 
   def toDomainF[F[_]](
-                       value: Option[SearchLimitDto]
-                     )(implicit S: Sync[F]): F[SearchLimit] = value match {
+      value: Option[SearchLimitDto]
+  )(implicit S: Sync[F]): F[SearchLimit] = value match {
     case None => SearchLimit(DefaultSearchLimit).pure[F]
     case Some(number) =>
       validate(number).combineAll match {
@@ -30,4 +30,3 @@ object SearchLimitDto {
       }
   }
 }
-

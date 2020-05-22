@@ -12,15 +12,15 @@ trait UserUsecases[F[_]] {
       searchLimit: SearchLimit
   ): F[List[User]]
   def deleteUserById(userId: UserId): F[Unit]
-  def addEmailToUser(
+  def addMailToUser(
       userId: UserId,
-      email: Mail
+      mail: Mail
   ): F[User]
-  def updateEmailFromUser(
+  def updateMailFromUser(
       userId: UserId,
-      email: MailWithId
+      mail: MailWithId
   ): F[User]
-  def deleteEmailFromUser(
+  def deleteMailFromUser(
       userId: UserId,
       mailId: MailId
   ): F[User]
@@ -32,7 +32,7 @@ trait UserUsecases[F[_]] {
       userId: UserId,
       number: NumberWithId
   ): F[User]
-def deleteNumberFromUser(
+  def deleteNumberFromUser(
       userId: UserId,
       numberId: NumberId
   ): F[User]

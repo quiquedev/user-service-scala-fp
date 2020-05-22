@@ -15,5 +15,5 @@ services:
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test
   - docker build -t quiquedev/user-service:latest .
-  - docker login --username=quiquedev --password=$DOCKER_HUB_PASSWORD 
+  - docker login --username=quiquedev --password=$DOCKER_HUB_PASSWORD
   - docker push quiquedev/user-service:latest

@@ -3,12 +3,12 @@ package info.quiquedev.userservice.routes.dtos
 import info.quiquedev.userservice.usecases.domain.User
 
 final case class UserDto(
-                          id: UserIdDto,
-                          firstName: FirstNameDto,
-                          lastName: LastNameDto,
-                          emails: List[MailWithIdDto],
-                          phoneNumbers: List[NumberWithIdDto]
-                        )
+    id: UserIdDto,
+    lastName: LastNameDto,
+    firstName: FirstNameDto,
+    emails: List[MailWithIdDto],
+    phoneNumbers: List[NumberWithIdDto]
+)
 
 object UserDto {
   implicit final class UserExtensions(val value: User) extends AnyVal {
@@ -17,8 +17,8 @@ object UserDto {
 
       UserDto(
         UserIdDto(id.value),
-        FirstNameDto(firstName.value),
         LastNameDto(lastName.value),
+        FirstNameDto(firstName.value),
         emails.map(e =>
           MailWithIdDto(MailIdDto(e.id.value), MailDto(e.mail.value))
         ),

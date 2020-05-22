@@ -30,8 +30,8 @@ object FirstNameDto {
     }
 
   def toDomainF[F[_]](
-                       value: FirstNameDto
-                     )(implicit S: Sync[F]): F[FirstName] =
+      value: FirstNameDto
+  )(implicit S: Sync[F]): F[FirstName] =
     validate(value).combineAll match {
       case Valid(_)        => FirstName(value.value).pure[F]
       case Invalid(errors) => S.raiseError(QueryParamValidationError(errors))

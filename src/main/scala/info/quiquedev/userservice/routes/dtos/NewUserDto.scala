@@ -7,22 +7,22 @@ import cats.implicits._
 import info.quiquedev.userservice.usecases.domain._
 
 final case class NewUserDto(
-                             firstName: Option[FirstNameDto],
-                             lastName: Option[LastNameDto],
-                             emails: Option[Set[MailDto]],
-                             phoneNumbers: Option[Set[NumberDto]]
-                           )
+    firstName: Option[FirstNameDto],
+    lastName: Option[LastNameDto],
+    emails: Option[Set[MailDto]],
+    phoneNumbers: Option[Set[NumberDto]]
+)
 
 object NewUserDto {
   private final case class NewUserDtoRequired(
-                                               firstName: FirstNameDto,
-                                               lastName: LastNameDto,
-                                               emails: Set[MailDto],
-                                               phoneNumbers: Set[NumberDto]
-                                             )
+      firstName: FirstNameDto,
+      lastName: LastNameDto,
+      emails: Set[MailDto],
+      phoneNumbers: Set[NumberDto]
+  )
 
   implicit final class NewUserDtoExtensions(val value: NewUserDto)
-    extends AnyVal {
+      extends AnyVal {
     def toDomainF[F[_]: Sync]: F[NewUser] =
       for {
         _ <- validateNullabilityF
@@ -84,8 +84,8 @@ object NewUserDto {
     }
 
     private def validateRequired[F[_]: Sync](
-                                              newUser: NewUserDtoRequired
-                                            ): F[Unit] = {
+        newUser: NewUserDtoRequired
+    ): F[Unit] = {
       val S = Sync[F]
       val emailValidations = NonEmptyList.of(
         Validated.condNel(
