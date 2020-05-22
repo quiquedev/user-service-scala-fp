@@ -1,14 +1,7 @@
-package info.quiquedev.userservice
+package info.quiquedev.userservice.usecases
 
-import cats.implicits._
 import cats.data.NonEmptyList
-import cats.effect.Async
-import doobie.util.transactor.Transactor
-import cats.ApplicativeError
-import doobie._
-import doobie.implicits._
-import Domain._
-import Dto._
+import domain._
 
 trait UserUsecases[F[_]] {
   def createUser(newUser: NewUser): F[User]

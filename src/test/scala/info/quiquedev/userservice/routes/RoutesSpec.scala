@@ -1,38 +1,16 @@
-package info.quiquedev.userservice
+package info.quiquedev.userservice.routes
 
-import org.http4s.HttpRoutes
-import org.http4s._
-import java.time.Instant
-import org.scalatest.wordspec.AnyWordSpec
 import cats.effect.IO
-import org.mockito.MockitoSugar
-import org.http4s.HttpRoutes
-import org.mockito.ArgumentMatchersSugar
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneId
-import org.http4s.Uri.uri
-import org.scalatest.matchers.should.Matchers
 import cats.implicits._
-import info.quiquedev.userservice.UserUsecases
-import junit.framework.Test
-import info.quiquedev.userservice.Dto.NewUserDto
-import info.quiquedev.userservice.Domain.FirstName
-import org.mockito.ArgumentMatchers.{eq => equ}
-import info.quiquedev.userservice.Dto.FirstNameDto
-import info.quiquedev.userservice.Dto.LastNameDto
-import info.quiquedev.userservice.Dto.MailDto
-import info.quiquedev.userservice.Dto.NumberDto
-import info.quiquedev.userservice.Domain.UserId
-import Domain._
+import info.quiquedev.userservice.usecases.UserUsecases
+import info.quiquedev.userservice.usecases.domain._
 import io.circe.parser._
-import org.scalatest.EitherValues
-import org.http4s.circe._
-import io.circe.syntax._
-import io.circe._
-import io.circe.generic.semiauto._
 import org.http4s._
+import org.http4s.circe._
 import org.http4s.implicits._
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 class RoutesSpec
     extends AnyWordSpec
@@ -686,7 +664,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.GET,
-                uri = uri("/users?firstName=enrique&lastName=molina")
+                uri = uri"/users?firstName=enrique&lastName=molina"
               )
             )
             .value
@@ -803,7 +781,7 @@ class RoutesSpec
             .run(
               Request[IO](
                 method = Method.GET,
-                uri = uri("/users?firstName=enrique&lastName=")
+                uri = uri"/users?firstName=enrique&lastName="
               )
             )
             .value

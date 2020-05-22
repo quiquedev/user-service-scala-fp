@@ -1,24 +1,15 @@
-package info.quiquedev.userservice
+package info.quiquedev.userservice.routes
 
 import cats.effect.Sync
 import cats.implicits._
-import org.http4s.HttpRoutes
-import org.http4s.dsl.Http4sDsl
-import org.http4s._
-import org.http4s.circe._
-import java.time.Instant
-import info.quiquedev.userservice.UserUsecases
-import Dto._
-import Dto.UserDto._
-import Dto.NewUserDto
-import Dto.NewUserDto._
-import info.quiquedev.userservice.Dto.NewUserDtoValidationError
-import Dto.FirstNameDto
-import Dto.LastNameDto
+import info.quiquedev.userservice.routes.dtos.{UserDto, FirstNameDto, LastNameDto, NewUserDto, NewUserDtoValidationError, QueryParamValidationError, SearchLimitDto, UsersDto}
+import info.quiquedev.userservice.usecases.UserUsecases
+import info.quiquedev.userservice.usecases.domain.{UserId, UserNotFoundError}
 import io.circe.generic.auto._
-import Dto.SearchLimitDto._
-import org.http4s.dsl.impl.QueryParamDecoderMatcher
-import org.http4s.dsl.impl.OptionalQueryParamDecoderMatcher
+import org.http4s.circe._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.dsl.impl.{OptionalQueryParamDecoderMatcher, QueryParamDecoderMatcher}
+import org.http4s.{HttpRoutes, _}
 
 object Routes {
   import Codec._
@@ -37,9 +28,8 @@ object Routes {
     import U._
 
     val dsl = new Http4sDsl[F] {}
-    import Domain._
-
     import dsl._
+import UserDto._
 
     HttpRoutes.of[F] {
       case req @ POST -> Root / "users" =>
