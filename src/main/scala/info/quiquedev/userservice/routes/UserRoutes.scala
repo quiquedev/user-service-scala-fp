@@ -13,7 +13,7 @@ import info.quiquedev.userservice.routes.dtos.{
   UsersDto
 }
 import info.quiquedev.userservice.usecases.UserUsecases
-import info.quiquedev.userservice.usecases.domain.{UserId, UserNotFoundError}
+import info.quiquedev.userservice.usecases.domain._
 import io.circe.generic.auto._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -81,9 +81,40 @@ object UserRoutes {
           updatedUser <- addEmailToUser(UserId(userId), mail)
           response <- Created(updatedUser.toDto)
         } yield response).recoverWith {
-          case RequestBodyValidationError(errors) => BadRequest(errors.toList.mkString("|"))
+          case RequestBodyValidationError(errors) =>
+            BadRequest(errors.toList.mkString("|"))
           case UserNotFoundError => NotFound()
           case TooManyMailsError => Conflict()
+        }
+      case req @ PUT -> Root / "users" / IntVar(userId) / "emails" / IntVar(
+            mailId
+          ) =>
+        (for {
+          newMailDto <- req.as[NewMailDto]
+          mail <- newMailDto.toDomainF
+          updatedUser <- updateEmailFromUser(
+            UserId(userId),
+            MailWithId(MailId(mailId), Mail(mail.value))
+          )
+          response <- Ok(updatedUser.toDto)
+        } yield response).recoverWith {
+          case RequestBodyValidationError(errors) =>
+            BadRequest(errors.toList.mkString("|"))
+          case MailNotFoundError => NotFound()
+          case UserNotFoundError => Gone()
+        }
+      case DELETE -> Root / "users" / IntVar(userId) / "emails" / IntVar(
+            mailId
+          ) =>
+        (for {
+          updatedUser <- deleteEmailFromUser(
+            UserId(userId),
+            MailId(mailId)
+          )
+          response <- Ok(updatedUser.toDto)
+        } yield response).recoverWith {
+          case MailNotFoundError => NotFound()
+          case UserNotFoundError => Gone()
         }
     }
   }

@@ -20,6 +20,10 @@ trait UserUsecases[F[_]] {
       userId: UserId,
       email: MailWithId
   ): F[User]
+  def deleteEmailFromUser(
+      userId: UserId,
+      mailId: MailId
+  ): F[User]
   def addPhoneNumberToUser(
       userId: UserId,
       phoneNumber: NumberWithId
