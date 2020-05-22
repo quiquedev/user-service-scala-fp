@@ -94,9 +94,9 @@ paths:
         '404':
           description: user not found for the given user id
 
-  /users/{userId}/emails:
+  /users/{userId}/mails:
     post:
-      summary: adds a new email to the given user
+      summary: adds a new mail to the given user
       parameters:
         - in: path
           name: userId
@@ -108,10 +108,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Email'
+              $ref: '#/components/schemas/Mail'
       responses:
         '201':
-          description: email has been added
+          description: mail has been added
         '400':
           description: request validation error. check response for details.
         '404':
@@ -119,9 +119,9 @@ paths:
         '409':
           description: there are already to many emails for the user
 
-  /users/{userId}/emails/{mailId}:
-    patch:
-      summary: modifies an email of a user
+  /users/{userId}/mails/{mailId}:
+    put:
+      summary: modifies a mail of an user
       parameters:
         - in: path
           name: userId
@@ -141,19 +141,21 @@ paths:
               $ref: '#/components/schemas/Mail'
       responses:
         '200':
-          description: email has been modified
+          description: mail has been modified
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MailModificationResult'
+                  $ref: '#/components/schemas/User'
         '400':
           description: request validation error. check response for details.
         '404':
-          description: email not found for user for the given email id
+          description: mail not found for user
+        '410':
+          description: user not found
     delete:
-      summary: deletes an email from an user
+      summary: deletes a mail from an user
       parameters:
         - in: path
           name: userId
@@ -167,21 +169,21 @@ paths:
             $ref: '#/components/schemas/MailId'
       responses:
         '200':
-          description: email has been deleted
+          description: mail has been deleted
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MailModificationResult'
-        '400':
-          description: request validation error. check response for details.
+                  $ref: '#/components/schemas/User'
         '404':
-          description: email not found for user
+          description: mail not found for user
+        '410':
+          description: user not found
 
-  /users/{userId}/phoneNumbers:
+  /users/{userId}/numbers:
     post:
-      summary: adds a new phone number to the given user
+      summary: adds a new number to the given user
       parameters:
         - in: path
           name: userId
@@ -196,13 +198,13 @@ paths:
               $ref: '#/components/schemas/NumberWithId'
       responses:
         '201':
-          description: phone number has been added
+          description: number has been added
         '400':
           description: request validation error. check response for details.
 
-  /users/{userId}/phoneNumbers/{numberId}:
+  /users/{userId}/numbers/{numberId}:
     patch:
-      summary: modifies a phone number of an user
+      summary: modifies a number of an user
       parameters:
         - in: path
           name: userId
@@ -228,13 +230,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NumberModificationResult'
+                  $ref: '#/components/schemas/User'
         '400':
           description: request validation error. check response for details.
         '404':
-          description: phone number not found for user for the given phone number id
+          description: phone number not found for user
+        '410':
+          description: user not found
     delete:
-      summary: deletes a phone number from an user
+      summary: deletes a number from an user
       parameters:
         - in: path
           name: userId
@@ -254,11 +258,13 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NumberModificationResult'
+                  $ref: '#/components/schemas/User'
         '400':
           description: request validation error. check response for details.
         '404':
-          description: phone number not found for user
+          description: number not found for user
+        '410':
+          description: user not found
 
 components:
   schemas:
@@ -290,21 +296,6 @@ components:
         value:
           $ref: '#/components/schemas/Mail'
 
-    MailModificationResult:
-      type: object
-      required:
-        - userId
-        - emails
-      properties:
-        userId:
-          $ref: '#/components/schemas/UserId'
-        emails:
-          type: array
-          minItems: 1
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/MailWithId'
-
     NumberId:
       type: integer
       format: int32
@@ -322,21 +313,6 @@ components:
         value:
           $ref: '#/components/schemas/Number'
  
-    NumberModificationResult:
-      type: object
-      required:
-        - userId
-        - phoneNumbers
-      properties:
-        userId:
-          $ref: '#/components/schemas/UserId'
-        phoneNumbers:
-          type: array
-          minItems: 1
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/NumberWithId'
-
     NumberWithId:
       type: object
       required:

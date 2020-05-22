@@ -32,11 +32,11 @@ object UserRoutes {
 
   def value[F[_]: Sync: UserUsecases]: HttpRoutes[F] = {
     val U = UserUsecases[F]
-    import U._
-
     val dsl = new Http4sDsl[F] {}
+    
     import UserDto._
     import dsl._
+    import U._
 
     HttpRoutes.of[F] {
       case req @ POST -> Root / "users" =>
@@ -159,8 +159,7 @@ object UserRoutes {
           case NumberNotFoundError => NotFound()
           case UserNotFoundError => Gone()
         }
-    }
-  }
+    }  }
 }
 
 private object Codec {
