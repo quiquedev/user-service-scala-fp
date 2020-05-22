@@ -1,3 +1,3 @@
 package info.quiquedev.userservice.routes.dtos
 
-final case class UsersDto(users: List[UserDto])
+final case class UsersDto(users: Set[UserDto])

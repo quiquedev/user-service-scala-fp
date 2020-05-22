@@ -1,9 +1,10 @@
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  lastName VARCHAR(500) NOT NULL,
-  firstName VARCHAR(500) NOT NULL,
+  last_name VARCHAR(500) NOT NULL,
+  first_name VARCHAR(500) NOT NULL,
   emails JSON NOT NULL,
-  phoneNumbers JSON NOT NULL
+  phone_numbers JSON NOT NULL
 );
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON users TO ${dbAppUser};
+GRANT USAGE, SELECT ON SEQUENCE users_id_seq TO ${dbAppUser};

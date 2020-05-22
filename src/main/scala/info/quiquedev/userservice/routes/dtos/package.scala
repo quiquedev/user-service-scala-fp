@@ -9,9 +9,7 @@ package object dtos {
   val FirstNameMaxLength = 500
   val LastNameMaxLength = 500
   val MailMaxLength = 500
-  val MaxMails = 10
   val PhoneNumberMaxLength = 500
-  val MaxNumbers = 10
   val MaxSearchLimit = 100
   val DefaultSearchLimit = 10
 

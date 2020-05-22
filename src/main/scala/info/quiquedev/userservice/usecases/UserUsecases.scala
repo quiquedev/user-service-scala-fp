@@ -25,6 +25,12 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.generic.auto._
 import io.circe.parser._
+import info.quiquedev.userservice.usecases.domain.UserNotFoundError
+import info.quiquedev.userservice.usecases.domain.DbError
+import info.quiquedev.userservice.usecases._
+import info.quiquedev.userservice._
+import info.quiquedev.userservice.usecases.domain.TooManyMailsError
+import info.quiquedev.userservice.usecases.domain.MailNotFoundError
 
 trait UserUsecases[F[_]] {
   def createUser(newUser: NewUser): F[User]
@@ -33,7 +39,7 @@ trait UserUsecases[F[_]] {
       firstName: FirstName,
       lastName: LastName,
       searchLimit: SearchLimit
-  ): F[List[User]]
+  ): F[Set[User]]
   def deleteUserById(userId: UserId): F[Unit]
   def addMailToUser(
       userId: UserId,
@@ -63,8 +69,6 @@ trait UserUsecases[F[_]] {
 }
 
 object UserUsecases {
-  import JsonDoobie._
-
   private type AdditionalData =
     (NonEmptyList[MailWithId], NonEmptyList[NumberWithId])
 
@@ -72,6 +76,8 @@ object UserUsecases {
 
   def impl[F[_]: Async](implicit xa: Transactor[F]): UserUsecases[F] =
     new UserUsecases[F] {
+      val CAE = ApplicativeError[ConnectionIO, Throwable]
+
       def createUser(newUser: NewUser): F[User] = {
         import newUser._
 
@@ -84,34 +90,86 @@ object UserUsecases {
         }
 
         sql"""
-            insert into users(lastName, firstName, emails, phoneNumbers)
+            insert into users(last_name, first_name, emails, phone_numbers)
             values ($lastName, $firstName, $mails, $numbers)
         """.update
           .withUniqueGeneratedKeys[User](
             "id",
-            "firstName",
-            "lastName",
+            "last_name",
+            "first_name",
             "emails",
-            "phoneNumbers"
+            "phone_numbers"
           )
           .transact(xa)
       }
 
-      def findUserById(userId: UserId): F[Option[User]] = ???
+      def findUserById(userId: UserId): F[Option[User]] =
+        findUser(userId).transact(xa)
 
       def findUsersByName(
           firstName: FirstName,
           lastName: LastName,
           searchLimit: SearchLimit
-      ): F[List[User]] = ???
+      ): F[Set[User]] =
+        sql"""
+          select *
+          from users
+          where (lower(last_name) = lower($lastName) and lower(first_name) = lower($firstName))
+          limit $searchLimit
+        """.query[User].to[Set].transact(xa)
 
-      def deleteUserById(userId: UserId): F[Unit] = ???
+      def deleteUserById(userId: UserId): F[Unit] =
+        sql"""delete from users where id = $userId""".update.run
+          .flatMap {
+            case 1 => CAE.unit
+            case 0 => CAE.raiseError[Unit](UserNotFoundError)
+            case _ =>
+              CAE.raiseError[Unit](DbError(s"user with $userId was not unique"))
+          }
+          .transact(xa)
 
-      def addMailToUser(userId: UserId, mail: Mail): F[User] = ???
+      def addMailToUser(userId: UserId, mail: Mail): F[User] = {
+        def addMail(mails: Set[MailWithId]): ConnectionIO[Set[MailWithId]] =
+          if (mails.size == MaxMailsPerUser) CAE.raiseError(TooManyMailsError)
+          else {
+            val mailId = MailId(mails.maxBy(_.id.value).id.value + 1)
+            (mails + MailWithId(mailId, mail)).pure[ConnectionIO]
+          }
 
-      def updateMailFromUser(userId: UserId, mail: MailWithId): F[User] = ???
+        (for {
+          mails <- userMails(userId)
+          updatedMails <- addMail(mails)
+          updatedUser <- updateUserMails(userId, updatedMails)
+        } yield updatedUser).transact(xa)
+      }
 
-      def deleteMailFromUser(userId: UserId, mailId: MailId): F[User] = ???
+      def updateMailFromUser(userId: UserId, mail: MailWithId): F[User] = {
+        def updateMail(mails: Set[MailWithId]): ConnectionIO[Set[MailWithId]] =
+          mails.find(_.id == mail.id) match {
+            case Some(_) => (mails + mail).pure[ConnectionIO]
+            case None    => CAE.raiseError(MailNotFoundError)
+          }
+
+        (for {
+          mails <- userMails(userId)
+          updatedMails <- updateMail(mails)
+          updatedUser <- updateUserMails(userId, updatedMails)
+        } yield updatedUser).transact(xa)
+      }
+
+      def deleteMailFromUser(userId: UserId, mailId: MailId): F[User] = {
+        def deleteMail(mails: Set[MailWithId]): ConnectionIO[Set[MailWithId]] =
+          mails.find(_.id == mailId) match {
+            case Some(mail) => (mails - mail).pure[ConnectionIO]
+            case None       => CAE.raiseError(MailNotFoundError)
+          }
+
+        (for {
+          mails <- userMails(userId)
+          updatedMails <- deleteMail(mails)
+          updatedUser <- updateUserMails(userId, updatedMails)
+        } yield updatedUser).transact(xa)
+      }
 
       def addNumberToUser(userId: UserId, number: Number): F[User] = ???
 
@@ -121,21 +179,37 @@ object UserUsecases {
       def deleteNumberFromUser(userId: UserId, numberId: NumberId): F[User] =
         ???
 
-    }
-}
+      private def updateUserMails(
+          userId: UserId,
+          mails: Set[MailWithId]
+      ): ConnectionIO[User] =
+        sql"""
+            update users
+            set emails = $mails
+            where id = $userId
+          """.update.withUniqueGeneratedKeys[User](
+          "id",
+          "last_name",
+          "first_name",
+          "emails",
+          "phone_numbers"
+        )
 
-private object JsonDoobie {
-  import org.postgresql.util.PGobject
-
-  implicit val jsonMeta: Meta[Json] =
-    Meta.Advanced
-      .other[PGobject]("json")
-      .timap[Json](a => parse(a.getValue).leftMap[Json](e => throw e).merge)(
-        a => {
-          val o = new PGobject
-          o.setType("json")
-          o.setValue(a.noSpaces)
-          o
+      private def userMails(userId: UserId): ConnectionIO[Set[MailWithId]] =
+        sql"""
+          select email
+          from users
+           where id = ${userId}
+        """".query[Set[MailWithId]].option.flatMap {
+          case None => CAE.raiseError(UserNotFoundError)
+          case Some(mails) => mails.pure[ConnectionIO]
         }
-      )
+
+      private def findUser(userId: UserId): ConnectionIO[Option[User]] = sql"""
+          select *
+          from users
+          where id = $userId
+        """.query[User].option
+
+    }
 }

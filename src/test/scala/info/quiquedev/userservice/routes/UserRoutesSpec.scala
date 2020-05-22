@@ -48,8 +48,8 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
-          List(NumberWithId(NumberId(1), Number("12345")))
+          Set(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
+          Set(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(usecases.createUser(newUser)) thenReturn user.pure[IO]
@@ -638,20 +638,20 @@ class UserRoutesSpec
         val firstName = FirstName("enrique")
         val lastName = LastName("molina")
 
-        val usersFound = List(
+        val usersFound = Set(
           User(
             UserId(1),
             LastName("molina"),
             FirstName("enrique"),
-            List(MailWithId(MailId(1), Mail("1"))),
-            List(NumberWithId(NumberId(1), Number("1")))
+            Set(MailWithId(MailId(1), Mail("1"))),
+            Set(NumberWithId(NumberId(1), Number("1")))
           ),
           User(
             UserId(2),
             LastName("molina"),
             FirstName("enrique"),
-            List(MailWithId(MailId(1), Mail("2"))),
-            List(NumberWithId(NumberId(1), Number("6")))
+            Set(MailWithId(MailId(1), Mail("2"))),
+            Set(NumberWithId(NumberId(1), Number("6")))
           )
         )
 
@@ -704,7 +704,7 @@ class UserRoutesSpec
         val firstName = FirstName("enrique")
         val lastName = LastName("molina")
 
-        when(usecases.findUsersByName(firstName, lastName, SearchLimit(10))) thenReturn List()
+        when(usecases.findUsersByName(firstName, lastName, SearchLimit(10))) thenReturn Set()
           .pure[IO]
 
         // when
@@ -866,8 +866,8 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
-          List(NumberWithId(NumberId(1), Number("12345")))
+          Set(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
+          Set(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(usecases.findUserById(user.id)) thenReturn user.some.pure[IO]
@@ -986,11 +986,11 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(
+          Set(
             MailWithId(MailId(0), Mail("emolina@yahoo.com")),
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
           ),
-          List(NumberWithId(NumberId(1), Number("12345")))
+          Set(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(usecases.addMailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn updatedUser
@@ -1197,7 +1197,6 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 409)
       }
     }
-
   }
 
   "/users/{userId}/mails/id" should {
@@ -1214,11 +1213,11 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(
+          Set(
             MailWithId(MailId(0), Mail("emolina@yahoo.com")),
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
           ),
-          List(NumberWithId(NumberId(1), Number("12345")))
+          Set(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(
@@ -1448,8 +1447,8 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
-          List(NumberWithId(NumberId(1), Number("12345")))
+          Set(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
+          Set(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn updateUser
@@ -1539,10 +1538,10 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(
+          Set(
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
           ),
-          List(
+          Set(
             NumberWithId(NumberId(0), Number("55555")),
             NumberWithId(NumberId(1), Number("12345"))
           )
@@ -1769,10 +1768,10 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(
+          Set(
             MailWithId(MailId(1), Mail("emolina@gmail.com"))
           ),
-          List(
+          Set(
             NumberWithId(NumberId(0), Number("55555")),
             NumberWithId(NumberId(1), Number("12345"))
           )
@@ -2005,8 +2004,8 @@ class UserRoutesSpec
           UserId(1),
           LastName("molina"),
           FirstName("enrique"),
-          List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
-          List(NumberWithId(NumberId(1), Number("12345")))
+          Set(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
+          Set(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(usecases.deleteNumberFromUser(UserId(1), NumberId(2))) thenReturn updateUser

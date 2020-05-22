@@ -5,6 +5,7 @@ import cats.data.{NonEmptyList, Validated}
 import cats.effect.Sync
 import cats.implicits._
 import info.quiquedev.userservice.usecases.domain._
+import info.quiquedev.userservice._
 
 final case class NewUserDto(
     firstName: Option[FirstNameDto],
@@ -94,9 +95,9 @@ object NewUserDto {
           s"emails cannot be empty"
         ),
         Validated.condNel(
-          newUser.emails.size <= MaxMails,
+          newUser.emails.size <= MaxMailsPerUser,
           (),
-          s"emails can have a max size of $MaxMails"
+          s"emails can have a max size of $MaxMailsPerUser"
         )
       ) ++ newUser.emails.toList.flatMap(e => MailDto.validate(e).toList)
 
@@ -107,9 +108,9 @@ object NewUserDto {
           s"phoneNumbers cannot be empty"
         ),
         Validated.condNel(
-          newUser.phoneNumbers.size <= MaxNumbers,
+          newUser.phoneNumbers.size <= MaxNumbersPerUser,
           (),
-          s"phoneNumbers can have a max size of $MaxMails"
+          s"phoneNumbers can have a max size of $MaxMailsPerUser"
         )
       ) ++ newUser.phoneNumbers.toList.flatMap(n =>
         NumberDto.validate(n).toList
