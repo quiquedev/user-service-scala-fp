@@ -1,6 +1,6 @@
 package info.quiquedev.userservice.routes.dtos
 
-final case class PhoneNumberWithIdDto(
-                                       id: PhoneNumberIdDto,
+final case class NumberWithIdDto(
+                                       id: NumberIdDto,
                                        number: NumberDto
                                      )

@@ -6,8 +6,8 @@ final case class UserDto(
                           id: UserIdDto,
                           firstName: FirstNameDto,
                           lastName: LastNameDto,
-                          emails: List[EmailWithIdDto],
-                          phoneNumbers: List[PhoneNumberWithIdDto]
+                          emails: List[MailWithIdDto],
+                          phoneNumbers: List[NumberWithIdDto]
                         )
 
 object UserDto {
@@ -20,11 +20,11 @@ object UserDto {
         FirstNameDto(firstName.value),
         LastNameDto(lastName.value),
         emails.map(e =>
-          EmailWithIdDto(EmailIdDto(e.id.value), MailDto(e.mail.value))
+          MailWithIdDto(MailIdDto(e.id.value), MailDto(e.mail.value))
         ),
         phoneNumbers.map(p =>
-          PhoneNumberWithIdDto(
-            PhoneNumberIdDto(p.id.value),
+          NumberWithIdDto(
+            NumberIdDto(p.id.value),
             NumberDto(p.number.value)
           )
         )

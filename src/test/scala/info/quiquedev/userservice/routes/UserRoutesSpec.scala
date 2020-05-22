@@ -12,7 +12,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-class RoutesSpec
+class UserRoutesSpec
     extends AnyWordSpec
     with Matchers
     with MockitoSugar
@@ -21,7 +21,7 @@ class RoutesSpec
 
   trait TestEnvironment {
     implicit val usecases: UserUsecases[IO] = mock[UserUsecases[IO]]
-    val routes = Routes.all[IO]
+    val routes = UserRoutes.value[IO]
   }
 
   "/users" should {
@@ -48,8 +48,8 @@ class RoutesSpec
           UserId(1),
           FirstName("enrique"),
           LastName("molina"),
-          List(Email(EmailId(1), Mail("emolina@gmail.com"))),
-          List(PhoneNumber(PhoneNumberId(1), Number("12345")))
+          List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
+          List(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(usecases.createUser(newUser)) thenReturn user.pure[IO]
@@ -643,15 +643,15 @@ class RoutesSpec
             UserId(1),
             FirstName("enrique"),
             LastName("molina"),
-            List(Email(EmailId(1), Mail("1"))),
-            List(PhoneNumber(PhoneNumberId(1), Number("1")))
+            List(MailWithId(MailId(1), Mail("1"))),
+            List(NumberWithId(NumberId(1), Number("1")))
           ),
           User(
             UserId(2),
             FirstName("enrique"),
             LastName("molina"),
-            List(Email(EmailId(1), Mail("2"))),
-            List(PhoneNumber(PhoneNumberId(1), Number("6")))
+            List(MailWithId(MailId(1), Mail("2"))),
+            List(NumberWithId(NumberId(1), Number("6")))
           )
         )
 
@@ -866,8 +866,8 @@ class RoutesSpec
           UserId(1),
           FirstName("enrique"),
           LastName("molina"),
-          List(Email(EmailId(1), Mail("emolina@gmail.com"))),
-          List(PhoneNumber(PhoneNumberId(1), Number("12345")))
+          List(MailWithId(MailId(1), Mail("emolina@gmail.com"))),
+          List(NumberWithId(NumberId(1), Number("12345")))
         )
 
         when(usecases.findUserById(user.id)) thenReturn user.some.pure[IO]

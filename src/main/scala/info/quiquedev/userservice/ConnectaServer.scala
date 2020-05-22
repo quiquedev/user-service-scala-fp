@@ -12,7 +12,7 @@ import java.time.Clock
 
 import cats.Monad
 import cats.implicits._
-import info.quiquedev.userservice.routes.Routes
+import info.quiquedev.userservice.routes.UserRoutes
 import info.quiquedev.userservice.usecases.UserUsecases
 
 object UserServiceServer {
@@ -28,7 +28,7 @@ object UserServiceServer {
       httpApp = {
         implicit val U: UserUsecases[F] = null
 
-        Routes.all[F].orNotFound
+        UserRoutes.value[F].orNotFound
       }
 
       finalHttpApp = Logger.httpApp(true, true)(httpApp)

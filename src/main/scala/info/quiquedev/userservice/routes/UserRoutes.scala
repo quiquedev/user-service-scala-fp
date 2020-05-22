@@ -11,19 +11,10 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.dsl.impl.{OptionalQueryParamDecoderMatcher, QueryParamDecoderMatcher}
 import org.http4s.{HttpRoutes, _}
 
-object Routes {
+object UserRoutes {
   import Codec._
 
-  private def health[F[_]: Sync]: HttpRoutes[F] = {
-    val dsl = new Http4sDsl[F] {}
-    import dsl._
-
-    HttpRoutes.of[F] {
-      case GET -> Root / "health" => Ok()
-    }
-  }
-
-  private def users[F[_]: Sync: UserUsecases]: HttpRoutes[F] = {
+  def value[F[_]: Sync: UserUsecases]: HttpRoutes[F] = {
     val U = UserUsecases[F]
     import U._
 
@@ -70,8 +61,6 @@ import UserDto._
         }
     }
   }
-
-  def all[F[_]: Sync: UserUsecases]: HttpRoutes[F] = health <+> users
 }
 
 private object Codec {

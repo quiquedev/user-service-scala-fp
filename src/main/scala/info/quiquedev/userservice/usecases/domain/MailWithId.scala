@@ -1,3 +1,3 @@
 package info.quiquedev.userservice.usecases.domain
 
-final case class Email(id: EmailId, mail: Mail)
+final case class MailWithId(id: MailId, mail: Mail)

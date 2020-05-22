@@ -3,9 +3,9 @@ package info.quiquedev.userservice.routes.dtos
 import io.circe.Encoder
 import io.circe.generic.extras.encoding.UnwrappedEncoder.encodeUnwrapped
 
-final case class PhoneNumberIdDto(value: Int) extends AnyVal
+final case class NumberIdDto(value: Int) extends AnyVal
 
-object PhoneNumberIdDto {
-  implicit val phoneNumberIdDtoEncoder: Encoder[PhoneNumberIdDto] =
+object NumberIdDto {
+  implicit val numberIdDtoEncoder: Encoder[NumberIdDto] =
     encodeUnwrapped
 }

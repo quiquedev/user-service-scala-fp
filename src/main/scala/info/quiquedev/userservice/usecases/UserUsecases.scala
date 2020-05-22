@@ -14,24 +14,24 @@ trait UserUsecases[F[_]] {
   def deleteUserById(userId: UserId): F[Unit]
   def addEmailToUser(
       userId: UserId,
-      email: Email
-  ): F[(UserId, NonEmptyList[Email])]
+      email: MailWithId
+  ): F[(UserId, NonEmptyList[MailWithId])]
   def updateEmailFromUser(
       userId: UserId,
-      email: Email
-  ): F[(UserId, NonEmptyList[Email])]
+      email: MailWithId
+  ): F[(UserId, NonEmptyList[MailWithId])]
   def addPhoneNumberToUser(
       userId: UserId,
-      phoneNumber: PhoneNumber
-  ): F[(UserId, NonEmptyList[PhoneNumber])]
+      phoneNumber: NumberWithId
+  ): F[(UserId, NonEmptyList[NumberWithId])]
   def updatePhoneNumberFromUser(
       userId: UserId,
-      phoneNumber: PhoneNumber
-  ): F[(UserId, NonEmptyList[PhoneNumber])]
+      phoneNumber: NumberWithId
+  ): F[(UserId, NonEmptyList[NumberWithId])]
 }
 
 object UserUsecases {
-  private type AdditionalData = (NonEmptyList[Email], NonEmptyList[PhoneNumber])
+  private type AdditionalData = (NonEmptyList[MailWithId], NonEmptyList[NumberWithId])
 
   def apply[F[_]](implicit ev: UserUsecases[F]) = ev
 }
