@@ -21,10 +21,9 @@ object DatabaseUtils {
 
   private def getDatabaseConfig[F[_]](implicit S: Sync[F]): F[DatabaseConfig] =
     ConfigSource.default.load[Config].map(_.db) match {
-      case Left(errors) => {
+      case Left(errors) =>
         val errorMsg = errors.toList.map(_.description).mkString("|")
         S.raiseError(ConfigurationLoadError(errorMsg))
-      }
       case Right(config) => config.pure[F]
     }
 

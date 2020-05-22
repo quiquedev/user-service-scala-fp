@@ -14,7 +14,7 @@ import org.http4s.server.middleware.Logger
 
 import scala.concurrent.ExecutionContext.global
 
-object UserServiceServer {
+object ConnectaServer {
   def stream[F[_]: ConcurrentEffect: Timer: ContextShift: Monad](
       implicit
       clock: Clock
@@ -30,7 +30,7 @@ object UserServiceServer {
         UserRoutes.value[F].orNotFound
       }
 
-      finalHttpApp = Logger.httpApp(true, true)(httpApp)
+      finalHttpApp = Logger.httpApp(logHeaders = true, logBody = true)(httpApp)
 
       exitCode <- BlazeServerBuilder[F]
         .bindHttp(8080, "0.0.0.0")

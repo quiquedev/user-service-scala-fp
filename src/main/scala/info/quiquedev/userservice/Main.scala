@@ -9,5 +9,5 @@ object Main extends IOApp {
   implicit val clock = Clock.systemUTC
 
   def run(args: List[String]) =
-    UserServiceServer.stream[IO].compile.drain.as(ExitCode.Success)
+    ConnectaServer.stream[IO].compile.drain.as(ExitCode.Success)
 }
