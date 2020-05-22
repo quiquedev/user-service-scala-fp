@@ -26,11 +26,13 @@ import io.circe.syntax._
 import io.circe.generic.auto._
 import io.circe.parser._
 import info.quiquedev.userservice.usecases.domain.UserNotFoundError
+import info.quiquedev.userservice.usecases.domain._
 import info.quiquedev.userservice.usecases.domain.DbError
 import info.quiquedev.userservice.usecases._
 import info.quiquedev.userservice._
 import info.quiquedev.userservice.usecases.domain.TooManyMailsError
 import info.quiquedev.userservice.usecases.domain.MailNotFoundError
+import info.quiquedev.userservice.usecases.domain.TooManyNumbersError
 
 trait UserUsecases[F[_]] {
   def createUser(newUser: NewUser): F[User]
@@ -171,13 +173,58 @@ object UserUsecases {
         } yield updatedUser).transact(xa)
       }
 
-      def addNumberToUser(userId: UserId, number: Number): F[User] = ???
+      def addNumberToUser(userId: UserId, number: Number): F[User] = {
+        def addNumber(
+            numbers: Set[NumberWithId]
+        ): ConnectionIO[Set[NumberWithId]] =
+          if (numbers.size == MaxNumbersPerUser)
+            CAE.raiseError(TooManyNumbersError)
+          else {
+            val numberId = NumberId(numbers.maxBy(_.id.value).id.value + 1)
+            (numbers + NumberWithId(numberId, number)).pure[ConnectionIO]
+          }
 
-      def updateNumberFromUser(userId: UserId, number: NumberWithId): F[User] =
-        ???
+        (for {
+          numbers <- userNumbers(userId)
+          updatedNumbers <- addNumber(numbers)
+          updatedUser <- updateUserNumbers(userId, updatedNumbers)
+        } yield updatedUser).transact(xa)
+      }
 
-      def deleteNumberFromUser(userId: UserId, numberId: NumberId): F[User] =
-        ???
+      def updateNumberFromUser(
+          userId: UserId,
+          number: NumberWithId
+      ): F[User] = {
+        def updateNumber(
+            numbers: Set[NumberWithId]
+        ): ConnectionIO[Set[NumberWithId]] =
+          numbers.find(_.id == number.id) match {
+            case Some(_) => (numbers + number).pure[ConnectionIO]
+            case None    => CAE.raiseError(NumberNotFoundError)
+          }
+
+        (for {
+          numbers <- userNumbers(userId)
+          updatedNumbers <- updateNumber(numbers)
+          updatedUser <- updateUserNumbers(userId, updatedNumbers)
+        } yield updatedUser).transact(xa)
+      }
+
+      def deleteNumberFromUser(userId: UserId, numberId: NumberId): F[User] = {
+        def deleteNumber(
+            numbers: Set[NumberWithId]
+        ): ConnectionIO[Set[NumberWithId]] =
+          numbers.find(_.id == numberId) match {
+            case Some(number) => (numbers - number).pure[ConnectionIO]
+            case None         => CAE.raiseError(NumberNotFoundError)
+          }
+
+        (for {
+          numbers <- userNumbers(userId)
+          updatedNumbers <- deleteNumber(numbers)
+          updatedUser <- updateUserNumbers(userId, updatedNumbers)
+        } yield updatedUser).transact(xa)
+      }
 
       private def updateUserMails(
           userId: UserId,
@@ -201,7 +248,33 @@ object UserUsecases {
           from users
            where id = ${userId}
         """".query[Set[MailWithId]].option.flatMap {
-          case None => CAE.raiseError(UserNotFoundError)
+          case None        => CAE.raiseError(UserNotFoundError)
+          case Some(mails) => mails.pure[ConnectionIO]
+        }
+
+      private def updateUserNumbers(
+          userId: UserId,
+          numbers: Set[NumberWithId]
+      ): ConnectionIO[User] =
+        sql"""
+            update users
+            set phone_numbers = $numbers
+            where id = $userId
+          """.update.withUniqueGeneratedKeys[User](
+          "id",
+          "last_name",
+          "first_name",
+          "emails",
+          "phone_numbers"
+        )
+
+      private def userNumbers(userId: UserId): ConnectionIO[Set[NumberWithId]] =
+        sql"""
+          select phone_numbers
+          from users
+           where id = ${userId}
+        """".query[Set[NumberWithId]].option.flatMap {
+          case None        => CAE.raiseError(UserNotFoundError)
           case Some(mails) => mails.pure[ConnectionIO]
         }
 
