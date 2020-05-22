@@ -46,7 +46,7 @@ object NewUserDto {
         .combineAll match {
         case Valid(_) => S.unit
         case Invalid(errors) =>
-          S.raiseError(NewUserDtoValidationError(errors))
+          S.raiseError(RequestBodyValidationError(errors))
       }
 
     }
@@ -123,7 +123,7 @@ object NewUserDto {
       validationResults.combineAll match {
         case Valid(_) => S.unit
         case Invalid(errors) =>
-          S.raiseError(NewUserDtoValidationError(errors))
+          S.raiseError(RequestBodyValidationError(errors))
       }
     }
   }

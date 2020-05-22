@@ -951,7 +951,9 @@ class UserRoutesSpec
       "return 404 if the user does not exist" in new TestEnvironment {
         // given
         val userId = UserId(1)
-        when(usecases.deleteUserById(userId)) thenReturn IO.raiseError(UserNotFoundError)
+        when(usecases.deleteUserById(userId)) thenReturn IO.raiseError(
+          UserNotFoundError
+        )
 
         // when
         val response =
@@ -967,6 +969,233 @@ class UserRoutesSpec
         // then
         verifyEmptyResponse(response, 404)
       }
+    }
+  }
+
+  "/users/{userId}/emails" should {
+    "support POST request to add email to user" which {
+      "return 201 if the email has been added" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "value": "enrique@gmail.com"
+        }
+        """
+
+        val updatedUser = User(
+          UserId(1),
+          FirstName("enrique"),
+          LastName("molina"),
+          List(
+            MailWithId(MailId(0), Mail("emolina@yahoo.com")),
+            MailWithId(MailId(1), Mail("emolina@gmail.com"))
+          ),
+          List(NumberWithId(NumberId(1), Number("12345")))
+        )
+
+        when(usecases.addEmailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn updatedUser
+          .pure[IO]
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri"/users/1/emails"
+              ).withEntity(
+                parse(requestBody)
+                  .getOrElse(fail("request body is not a valid json"))
+              )
+            )
+            .value
+
+        // then
+        val expectedResponseBody =
+          """
+        {
+          "id": 1,
+          "lastName": "molina",
+          "firstName": "enrique",
+          "emails": [{"id": 0, "mail": "emolina@yahoo.com"},{"id": 1, "mail": "emolina@gmail.com"}],
+          "phoneNumbers": [{"id": 1, "number": "12345"}]
+        }
+        """
+
+        verifyJsonResponse(
+          response,
+          201,
+          parse(expectedResponseBody).getOrElse(
+            fail("expected response body is not a valid json")
+          )
+        )
+      }
+
+      "return 400 if value is not present" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri"/users/1/emails"
+              ).withEntity(
+                parse(requestBody)
+                  .getOrElse(fail("request body is not a valid json"))
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(response, 400, "value must be present and not null")
+      }
+
+      "return 400 if value is null" in new TestEnvironment {
+        // given
+        val requestBody = """
+        {
+          "value": null
+        }
+        """
+
+        // when
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.POST,
+                uri = uri"/users/1/emails"
+              ).withEntity(
+                parse(requestBody)
+                  .getOrElse(fail("request body is not a valid json"))
+              )
+            )
+            .value
+
+        // then
+        verifyTextResponse(response, 400, "value must be present and not null")
+      }
+    }
+
+    "return 400 if value is empty" in new TestEnvironment {
+      // given
+      val requestBody = """
+        {
+          "value": ""
+        }
+        """
+
+      // when
+      val response =
+        routes
+          .run(
+            Request[IO](
+              method = Method.POST,
+              uri = uri"/users/1/emails"
+            ).withEntity(
+              parse(requestBody)
+                .getOrElse(fail("request body is not a valid json"))
+            )
+          )
+          .value
+
+      // then
+      verifyTextResponse(response, 400, "mail cannot be empty")
+    }
+
+    "return 400 if value is too long" in new TestEnvironment {
+      // given
+      val longMail = "a" * 1000
+      val requestBody = s"""
+        {
+          "value": "$longMail"
+        }
+        """
+
+      // when
+      val response =
+        routes
+          .run(
+            Request[IO](
+              method = Method.POST,
+              uri = uri"/users/1/emails"
+            ).withEntity(
+              parse(requestBody)
+                .getOrElse(fail("request body is not a valid json"))
+            )
+          )
+          .value
+
+      // then
+      verifyTextResponse(
+        response,
+        400,
+        s"mail '$longMail' is too long (max length 500)"
+      )
+    }
+
+    "return 404 if the the user does not exist" in new TestEnvironment {
+      // given
+      val requestBody = """
+        {
+          "value": "enrique@gmail.com"
+        }
+        """
+
+      when(usecases.addEmailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn IO
+        .raiseError(UserNotFoundError)
+
+      // when
+      val response =
+        routes
+          .run(
+            Request[IO](
+              method = Method.POST,
+              uri = uri"/users/1/emails"
+            ).withEntity(
+              parse(requestBody)
+                .getOrElse(fail("request body is not a valid json"))
+            )
+          )
+          .value
+
+      // then
+      verifyEmptyResponse(response, 404)
+    }
+
+    "return 409 if the the user has already too many mails" in new TestEnvironment {
+      // given
+      val requestBody = """
+        {
+          "value": "enrique@gmail.com"
+        }
+        """
+
+      when(usecases.addEmailToUser(UserId(1), Mail("enrique@gmail.com"))) thenReturn IO
+        .raiseError(TooManyMailsError)
+
+      // when
+      val response =
+        routes
+          .run(
+            Request[IO](
+              method = Method.POST,
+              uri = uri"/users/1/emails"
+            ).withEntity(
+              parse(requestBody)
+                .getOrElse(fail("request body is not a valid json"))
+            )
+          )
+          .value
+
+      // then
+      verifyEmptyResponse(response, 409)
     }
   }
 }

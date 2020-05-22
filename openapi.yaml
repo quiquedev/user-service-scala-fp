@@ -114,10 +114,12 @@ paths:
           description: email has been added
         '400':
           description: request validation error. check response for details.
+        '404':
+          description: user does not exist
         '409':
           description: there are already to many emails for the user
 
-  /users/{userId}/emails/{emailId}:
+  /users/{userId}/emails/{mailId}:
     patch:
       summary: modifies an email of a user
       parameters:
@@ -127,10 +129,10 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: emailId
+          name: mailId 
           required: true
           schema:
-            $ref: '#/components/schemas/EmailId'
+            $ref: '#/components/schemas/MailId'
       requestBody:
         required: true
         content:
@@ -159,10 +161,10 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: emailId
+          name: mailId 
           required: true
           schema:
-            $ref: '#/components/schemas/EmailId'
+            $ref: '#/components/schemas/MailId'
       responses:
         '200':
           description: email has been deleted
@@ -191,14 +193,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PhoneNumber'
+              $ref: '#/components/schemas/NumberWithId'
       responses:
         '201':
           description: phone number has been added
         '400':
           description: request validation error. check response for details.
 
-  /users/{userId}/phoneNumbers/{phoneNumberId}:
+  /users/{userId}/phoneNumbers/{numberId}:
     patch:
       summary: modifies a phone number of an user
       parameters:
@@ -208,10 +210,10 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: phoneNumberId
+          name: numberId 
           required: true
           schema:
-            $ref: '#/components/schemas/PhoneNumberId'
+            $ref: '#/components/schemas/NumberId'
       requestBody:
         required: true
         content:
@@ -240,10 +242,10 @@ paths:
           schema:
             $ref: '#/components/schemas/UserId'
         - in: path
-          name: phoneNumberId
+          name: numberId 
           required: true
           schema:
-            $ref: '#/components/schemas/PhoneNumberId'
+            $ref: '#/components/schemas/NumberId'
       responses:
         '200':
           description: number has been deleted
@@ -260,7 +262,7 @@ paths:
 
 components:
   schemas:
-    EmailId:
+    MailId:
       type: integer
       format: int32
 
@@ -269,14 +271,14 @@ components:
      minimum: 1
      maximum: 500
 
-    Email:
+    MailWithId:
       type: object
       required:
         - id
         - mail
       properties:
         id:
-          $ref: '#/components/schemas/EmailId'
+          $ref: '#/components/schemas/MailId'
         mail:
           $ref: '#/components/schemas/Mail'
 
@@ -301,9 +303,9 @@ components:
           minItems: 1
           maxItems: 10
           items:
-            $ref: '#/components/schemas/Email'
+            $ref: '#/components/schemas/MailWithId'
 
-    PhoneNumberId:
+    NumberId:
       type: integer
       format: int32
 
@@ -333,16 +335,16 @@ components:
           minItems: 1
           maxItems: 10
           items:
-            $ref: '#/components/schemas/PhoneNumber'
+            $ref: '#/components/schemas/NumberWithId'
 
-    PhoneNumber:
+    NumberWithId:
       type: object
       required:
         - id
         - number
       properties:
         id:
-          $ref: '#/components/schemas/PhoneNumberId'
+          $ref: '#/components/schemas/NumberId'
         number:
           $ref: '#/components/schemas/Number'
 
@@ -380,13 +382,13 @@ components:
           minItems: 1
           maxItems: 10
           items:
-            $ref: '#/components/schemas/Email'
+            $ref: '#/components/schemas/MailWithId'
         phoneNumbers:
           type: array
           minItems: 1
           maxItems: 10
           items:
-            $ref: '#/components/schemas/PhoneNumber'
+            $ref: '#/components/schemas/NumberWithId'
 
     NewUser:
       type: object

@@ -2,3 +2,5 @@ package info.quiquedev.userservice.usecases.domain
 
 sealed trait UserUsecasesError extends RuntimeException
 final case object UserNotFoundError extends UserUsecasesError
+final case object TooManyMailsError extends UserUsecasesError
+final case object TooManyNumberError extends UserUsecasesError
