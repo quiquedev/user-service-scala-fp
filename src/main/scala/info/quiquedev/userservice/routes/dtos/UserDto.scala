@@ -6,8 +6,8 @@ final case class UserDto(
     id: UserIdDto,
     lastName: LastNameDto,
     firstName: FirstNameDto,
-    emails: List[MailWithIdDto],
-    phoneNumbers: List[NumberWithIdDto]
+    emails: Set[MailWithIdDto],
+    phoneNumbers: Set[NumberWithIdDto]
 )
 
 object UserDto {

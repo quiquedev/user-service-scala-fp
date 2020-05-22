@@ -21,6 +21,7 @@ lazy val root = (project in file("."))
       "org.http4s" %% "http4s-circe" % Http4sVersion,
       "org.http4s" %% "http4s-dsl" % Http4sVersion,
       "io.circe" %% "circe-generic-extras" % CirceVersion,
+      "io.circe" %% "circe-parser" % CirceVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "org.tpolecat" %% "doobie-core" % DoobieVersion,
       "org.tpolecat" %% "doobie-postgres" % DoobieVersion,
@@ -30,8 +31,7 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest" % ScalaTestVersion,
       "com.dimafeng" %% "testcontainers-scala-scalatest" % TestcontainersScalaVersion,
       "com.dimafeng" %% "testcontainers-scala-postgresql" % TestcontainersScalaVersion,
-      "org.mockito" %% "mockito-scala" % MockitoScalaVersion,
-      "io.circe" %% "circe-parser" % CirceVersion
+      "org.mockito" %% "mockito-scala" % MockitoScalaVersion
     ).map(_ % Test),
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),

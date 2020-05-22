@@ -1,7 +1,7 @@
 CREATE TABLE users (
-  id INTEGER PRIMARY KEY,
-  firstName VARCHAR(500) NOT NULL,
+  id SERIAL PRIMARY KEY,
   lastName VARCHAR(500) NOT NULL,
+  firstName VARCHAR(500) NOT NULL,
   emails JSON NOT NULL,
   phoneNumbers JSON NOT NULL
 );

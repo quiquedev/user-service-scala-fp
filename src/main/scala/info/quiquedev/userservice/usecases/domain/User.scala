@@ -4,6 +4,6 @@ final case class User(
     id: UserId,
     lastName: LastName,
     firstName: FirstName,
-    emails: List[MailWithId],
-    phoneNumbers: List[NumberWithId]
+    emails: Set[MailWithId],
+    phoneNumbers: Set[NumberWithId]
 )
