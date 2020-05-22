@@ -24,14 +24,19 @@ trait UserUsecases[F[_]] {
       userId: UserId,
       mailId: MailId
   ): F[User]
-  def addPhoneNumberToUser(
+  def addNumberToUser(
       userId: UserId,
-      phoneNumber: NumberWithId
+      number: Number
   ): F[User]
-  def updatePhoneNumberFromUser(
+  def updateNumberFromUser(
       userId: UserId,
-      phoneNumber: NumberWithId
+      number: NumberWithId
   ): F[User]
+def deleteNumberFromUser(
+      userId: UserId,
+      numberId: NumberId
+  ): F[User]
+
 }
 
 object UserUsecases {

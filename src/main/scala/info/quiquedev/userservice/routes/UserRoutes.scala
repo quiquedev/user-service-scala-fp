@@ -25,6 +25,7 @@ import org.http4s.{HttpRoutes, _}
 import info.quiquedev.userservice.routes.dtos.MailDto
 import info.quiquedev.userservice.routes.dtos.NewMailDto
 import info.quiquedev.userservice.usecases.domain.TooManyMailsError
+import info.quiquedev.userservice.routes.dtos.NewNumberDto
 
 object UserRoutes {
   import Codec._
@@ -74,7 +75,7 @@ object UserRoutes {
         } yield response).recoverWith {
           case UserNotFoundError => NotFound()
         }
-      case req @ POST -> Root / "users" / IntVar(userId) / "emails" =>
+      case req @ POST -> Root / "users" / IntVar(userId) / "mails" =>
         (for {
           newMailDto <- req.as[NewMailDto]
           mail <- newMailDto.toDomainF
@@ -86,7 +87,7 @@ object UserRoutes {
           case UserNotFoundError => NotFound()
           case TooManyMailsError => Conflict()
         }
-      case req @ PUT -> Root / "users" / IntVar(userId) / "emails" / IntVar(
+      case req @ PUT -> Root / "users" / IntVar(userId) / "mails" / IntVar(
             mailId
           ) =>
         (for {
@@ -103,7 +104,7 @@ object UserRoutes {
           case MailNotFoundError => NotFound()
           case UserNotFoundError => Gone()
         }
-      case DELETE -> Root / "users" / IntVar(userId) / "emails" / IntVar(
+      case DELETE -> Root / "users" / IntVar(userId) / "mails" / IntVar(
             mailId
           ) =>
         (for {
@@ -114,6 +115,48 @@ object UserRoutes {
           response <- Ok(updatedUser.toDto)
         } yield response).recoverWith {
           case MailNotFoundError => NotFound()
+          case UserNotFoundError => Gone()
+        }
+      case req @ POST -> Root / "users" / IntVar(userId) / "numbers" =>
+        (for {
+          newNumberDto <- req.as[NewNumberDto]
+          number <- newNumberDto.toDomainF
+          updatedUser <- addNumberToUser(UserId(userId), number)
+          response <- Created(updatedUser.toDto)
+        } yield response).recoverWith {
+          case RequestBodyValidationError(errors) =>
+            BadRequest(errors.toList.mkString("|"))
+          case UserNotFoundError => NotFound()
+          case TooManyNumbersError => Conflict()
+        }
+      case req @ PUT -> Root / "users" / IntVar(userId) / "numbers" / IntVar(
+            numberId
+          ) =>
+        (for {
+          newNumberDto <- req.as[NewNumberDto]
+          number <- newNumberDto.toDomainF
+          updatedUser <- updateNumberFromUser(
+            UserId(userId),
+            NumberWithId(NumberId(numberId), Number(number.value))
+          )
+          response <- Ok(updatedUser.toDto)
+        } yield response).recoverWith {
+          case RequestBodyValidationError(errors) =>
+            BadRequest(errors.toList.mkString("|"))
+          case NumberNotFoundError => NotFound()
+          case UserNotFoundError => Gone()
+        }
+      case DELETE -> Root / "users" / IntVar(userId) / "numbers" / IntVar(
+            numberId
+          ) =>
+        (for {
+          updatedUser <- deleteNumberFromUser(
+            UserId(userId),
+            NumberId(numberId)
+          )
+          response <- Ok(updatedUser.toDto)
+        } yield response).recoverWith {
+          case NumberNotFoundError => NotFound()
           case UserNotFoundError => Gone()
         }
     }
@@ -135,6 +178,9 @@ private object Codec {
 
   implicit def newMailDtoEntityDecoder[F[_]: Sync]
       : EntityDecoder[F, NewMailDto] = jsonOf
+
+  implicit def newNumberDtoEntityDecoder[F[_]: Sync]
+      : EntityDecoder[F, NewNumberDto] = jsonOf
 
   implicit val firstNameDtoQueryParamDecoder: QueryParamDecoder[FirstNameDto] =
     QueryParamDecoder[String].map(FirstNameDto.apply)
