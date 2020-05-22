@@ -1,7 +1,7 @@
 package info.quiquedev.userservice.usecases
 
 import cats.data.NonEmptyList
-import domain._
+import info.quiquedev.userservice.usecases.domain._
 
 trait UserUsecases[F[_]] {
   def createUser(newUser: NewUser): F[User]

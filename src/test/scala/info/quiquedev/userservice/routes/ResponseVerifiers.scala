@@ -1,8 +1,7 @@
 package info.quiquedev.userservice.routes
-import org.scalatest.Suite
 import cats.effect.IO
-import org.http4s.Response
-import org.http4s.EntityDecoder
+import org.http4s.{EntityDecoder, Response}
+import org.scalatest.Suite
 
 trait ResponseVerifiers { self: Suite =>
 

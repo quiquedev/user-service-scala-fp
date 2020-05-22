@@ -1,13 +1,13 @@
 package info.quiquedev.userservice.routes.dtos
 
-import cats.data.{NonEmptyList, Validated}
 import cats.data.Validated.{Invalid, Valid}
+import cats.data.{NonEmptyList, Validated}
 import cats.effect.Sync
+import cats.implicits._
 import info.quiquedev.userservice.usecases.domain.FirstName
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.extras.decoding.UnwrappedDecoder.decodeUnwrapped
 import io.circe.generic.extras.encoding.UnwrappedEncoder.encodeUnwrapped
-import cats.implicits._
+import io.circe.{Decoder, Encoder}
 
 final case class FirstNameDto(value: String) extends AnyVal
 
@@ -15,7 +15,7 @@ object FirstNameDto {
   implicit val firstNameDtoEncoder: Encoder[FirstNameDto] = encodeUnwrapped
   implicit val firstNameDtoDecoder: Decoder[FirstNameDto] = decodeUnwrapped
 
-  def validate(value: FirstNameDto): ValidationResults =
+  private[dtos] def validate(value: FirstNameDto): ValidationResults =
     Option(value.value).filter(_.nonNullOrEmpty) match {
       case None =>
         "firstName cannot be empty".invalidNel.pure[NonEmptyList]

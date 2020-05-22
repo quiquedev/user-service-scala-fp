@@ -2,7 +2,7 @@ package info.quiquedev.userservice.routes
 
 import cats.effect.Sync
 import cats.implicits._
-import info.quiquedev.userservice.routes.dtos.{UserDto, FirstNameDto, LastNameDto, NewUserDto, NewUserDtoValidationError, QueryParamValidationError, SearchLimitDto, UsersDto}
+import info.quiquedev.userservice.routes.dtos.{FirstNameDto, LastNameDto, NewUserDto, NewUserDtoValidationError, QueryParamValidationError, SearchLimitDto, UserDto, UsersDto}
 import info.quiquedev.userservice.usecases.UserUsecases
 import info.quiquedev.userservice.usecases.domain.{UserId, UserNotFoundError}
 import io.circe.generic.auto._
@@ -19,8 +19,8 @@ object UserRoutes {
     import U._
 
     val dsl = new Http4sDsl[F] {}
+    import UserDto._
     import dsl._
-import UserDto._
 
     HttpRoutes.of[F] {
       case req @ POST -> Root / "users" =>

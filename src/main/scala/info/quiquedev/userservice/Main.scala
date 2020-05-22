@@ -1,8 +1,9 @@
 package info.quiquedev.userservice
 
+import java.time.Clock
+
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.implicits._
-import java.time.Clock
 
 object Main extends IOApp {
   implicit val clock = Clock.systemUTC

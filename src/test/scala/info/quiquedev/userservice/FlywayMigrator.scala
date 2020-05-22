@@ -1,8 +1,9 @@
 package info.quiquedev.userservice
 
-import doobie.util.transactor.Transactor
 import cats.effect.IO
+import doobie.util.transactor.Transactor
 import org.flywaydb.core.Flyway
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.jdk.CollectionConverters._
 

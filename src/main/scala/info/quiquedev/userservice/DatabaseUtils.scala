@@ -1,17 +1,13 @@
 package info.quiquedev.userservice
 
+import cats.effect.{Async, ContextShift, Sync}
+import cats.implicits._
 import doobie.util.transactor.Transactor
 import org.flywaydb.core.Flyway
-import scala.jdk.CollectionConverters._
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
-import cats.effect.Async
-import cats.effect.ContextShift
-import cats.effect.Sync
 import pureconfig._
 import pureconfig.generic.auto._
-import cats.implicits._
+import scala.jdk.CollectionConverters._
+import scala.util.{Failure, Success, Try}
 
 object DatabaseUtils {
   def migrateDbAndGetTransactor[F[_]: ContextShift]()(

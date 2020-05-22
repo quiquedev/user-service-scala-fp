@@ -1,10 +1,10 @@
 package info.quiquedev.userservice.routes.dtos
 
-import cats.data.{NonEmptyList, Validated}
 import cats.data.Validated.{Invalid, Valid}
+import cats.data.{NonEmptyList, Validated}
 import cats.effect.Sync
-import info.quiquedev.userservice.usecases.domain.SearchLimit
 import cats.implicits._
+import info.quiquedev.userservice.usecases.domain.SearchLimit
 
 final case class SearchLimitDto(value: Int) extends AnyVal
 
