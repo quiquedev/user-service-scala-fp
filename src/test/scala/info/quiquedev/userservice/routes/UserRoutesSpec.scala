@@ -26,7 +26,7 @@ class UserRoutesSpec
 
   "/users" should {
     "support POST request to create an user" which {
-      "return 201 if the user was created" in new TestEnvironment {
+      "returns 201 if the user was created" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -89,7 +89,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the user last name is not present" in new TestEnvironment {
+      "returns 400 if the user last name is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -118,7 +118,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the user last name is null" in new TestEnvironment {
+      "returns 400 if the user last name is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -148,7 +148,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the user last name is empty" in new TestEnvironment {
+      "returns 400 if the user last name is empty" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -179,7 +179,7 @@ class UserRoutesSpec
 
       }
 
-      "return 400 if the user last name is too long" in new TestEnvironment {
+      "returns 400 if the user last name is too long" in new TestEnvironment {
         // given
         val requestBody = s"""
         {
@@ -209,7 +209,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the user first name is not present" in new TestEnvironment {
+      "returns 400 if the user first name is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -238,7 +238,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the user first name is null" in new TestEnvironment {
+      "returns 400 if the user first name is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -268,7 +268,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if the user first name is empty" in new TestEnvironment {
+      "returns 400 if the user first name is empty" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -299,7 +299,7 @@ class UserRoutesSpec
 
       }
 
-      "return 400 if the user first name is too long" in new TestEnvironment {
+      "returns 400 if the user first name is too long" in new TestEnvironment {
         // given
         val requestBody = s"""
         {
@@ -329,7 +329,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if emails is not present" in new TestEnvironment {
+      "returns 400 if emails is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -353,7 +353,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails must be present and not null")
       }
 
-      "return 400 if emails is null" in new TestEnvironment {
+      "returns 400 if emails is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -378,7 +378,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails must be present and not null")
       }
 
-      "return 400 if emails is empty" in new TestEnvironment {
+      "returns 400 if emails is empty" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -403,7 +403,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails cannot be empty")
       }
 
-      "return 400 if emails is too big" in new TestEnvironment {
+      "returns 400 if emails is too big" in new TestEnvironment {
         // given
         val requestBody =
           """
@@ -429,7 +429,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "emails can have a max size of 10")
       }
 
-      "return 400 if emails contains too long emails" in new TestEnvironment {
+      "returns 400 if emails contains too long emails" in new TestEnvironment {
         // given
         val longEmail = "a" * 1000
 
@@ -461,7 +461,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if phoneNumbers is not present" in new TestEnvironment {
+      "returns 400 if phoneNumbers is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -489,7 +489,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if phoneNumbers is null" in new TestEnvironment {
+      "returns 400 if phoneNumbers is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -518,7 +518,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if phoneNumbers is empty" in new TestEnvironment {
+      "returns 400 if phoneNumbers is empty" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -543,7 +543,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "phoneNumbers cannot be empty")
       }
 
-      "return 400 if phoneNumbers is too big" in new TestEnvironment {
+      "returns 400 if phoneNumbers is too big" in new TestEnvironment {
         // given
         val requestBody =
           """
@@ -573,7 +573,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if phoneNumbers contains too long mails" in new TestEnvironment {
+      "returns 400 if phoneNumbers contains too long mails" in new TestEnvironment {
         // given
         val longNumber = "1" * 1000
 
@@ -605,7 +605,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if more than one validation fails" in new TestEnvironment {
+      "returns 400 if more than one validation fails" in new TestEnvironment {
         // given
         val requestBody =
           s"""
@@ -634,7 +634,7 @@ class UserRoutesSpec
       }
     }
     "support GET request to find users by name" which {
-      "return 200 and the found users" in new TestEnvironment {
+      "returns 200 and the found users" in new TestEnvironment {
         val firstName = FirstName("enrique")
         val lastName = LastName("molina")
 
@@ -700,7 +700,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 200 and no users if search didn't find anything" in new TestEnvironment {
+      "returns 200 and no users if search didn't find anything" in new TestEnvironment {
         val firstName = FirstName("enrique")
         val lastName = LastName("molina")
 
@@ -734,7 +734,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if first name is empty" in new TestEnvironment {
+      "returns 400 if first name is empty" in new TestEnvironment {
         // when
         val response =
           routes
@@ -750,7 +750,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "firstName cannot be empty")
       }
 
-      "return 400 if first name is too long" in new TestEnvironment {
+      "returns 400 if first name is too long" in new TestEnvironment {
         // given
         val longFirstName = "a" * 1000
         val uriString = s"/users?firstName=$longFirstName&lastName=molina"
@@ -774,7 +774,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if last name is empty" in new TestEnvironment {
+      "returns 400 if last name is empty" in new TestEnvironment {
         // when
         val response =
           routes
@@ -790,7 +790,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "lastName cannot be empty")
       }
 
-      "return 400 if last name is too long" in new TestEnvironment {
+      "returns 400 if last name is too long" in new TestEnvironment {
         // given
         val longLastName = "a" * 1000
         val uriString = s"/users?firstName=enrique&lastName=$longLastName"
@@ -814,7 +814,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if search limit is too small" in new TestEnvironment {
+      "returns 400 if search limit is too small" in new TestEnvironment {
         // when
         val response =
           routes
@@ -835,7 +835,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if search limit is too big" in new TestEnvironment {
+      "returns 400 if search limit is too big" in new TestEnvironment {
         // when
         val response =
           routes
@@ -860,7 +860,7 @@ class UserRoutesSpec
 
   "/users/{userId}" should {
     "support GET request to find an user by the user id" which {
-      "return 200 if the user is found" in new TestEnvironment {
+      "returns 200 if the user is found" in new TestEnvironment {
         // given
         val user = User(
           UserId(1),
@@ -905,7 +905,7 @@ class UserRoutesSpec
 
       }
 
-      "return 404 if the user is not found" in new TestEnvironment {
+      "returns 404 if the user is not found" in new TestEnvironment {
         // given
         val userId = UserId(1)
         when(usecases.findUserById(userId)) thenReturn none[User].pure[IO]
@@ -927,7 +927,7 @@ class UserRoutesSpec
     }
 
     "support DELETE request to delete an user by the user id" which {
-      "return 200 if the user has been deleted" in new TestEnvironment {
+      "returns 200 if the user has been deleted" in new TestEnvironment {
         // given
         val userId = UserId(1)
 
@@ -948,7 +948,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 200)
       }
 
-      "return 404 if the user does not exist" in new TestEnvironment {
+      "returns 404 if the user does not exist" in new TestEnvironment {
         // given
         val userId = UserId(1)
         when(usecases.deleteUserById(userId)) thenReturn IO.raiseError(
@@ -974,7 +974,7 @@ class UserRoutesSpec
 
   "/users/{userId}/mails" should {
     "support POST request to add mail to user" which {
-      "return 201 if the mail has been added" in new TestEnvironment {
+      "returns 201 if the mail has been added" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1031,7 +1031,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if value is not present" in new TestEnvironment {
+      "returns 400 if value is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1056,7 +1056,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is null" in new TestEnvironment {
+      "returns 400 if value is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1082,7 +1082,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is empty" in new TestEnvironment {
+      "returns 400 if value is empty" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1108,7 +1108,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "mail cannot be empty")
       }
 
-      "return 400 if value is too long" in new TestEnvironment {
+      "returns 400 if value is too long" in new TestEnvironment {
         // given
         val longMail = "a" * 1000
         val requestBody = s"""
@@ -1139,7 +1139,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 404 if the the user does not exist" in new TestEnvironment {
+      "returns 404 if the the user does not exist" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1168,7 +1168,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 404)
       }
 
-      "return 409 if the the user has already too many mails" in new TestEnvironment {
+      "returns 409 if the the user has already too many mails" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1201,7 +1201,7 @@ class UserRoutesSpec
 
   "/users/{userId}/mails/id" should {
     "support PUT request to modify a mail from an user" which {
-      "return 200 if the mail has been modified" in new TestEnvironment {
+      "returns 200 if the mail has been modified" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1263,7 +1263,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if value is not present" in new TestEnvironment {
+      "returns 400 if value is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1288,7 +1288,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is null" in new TestEnvironment {
+      "returns 400 if value is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1314,7 +1314,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is empty" in new TestEnvironment {
+      "returns 400 if value is empty" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1340,7 +1340,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "mail cannot be empty")
       }
 
-      "return 400 if value is too long" in new TestEnvironment {
+      "returns 400 if value is too long" in new TestEnvironment {
         // given
         val longMail = "a" * 1000
         val requestBody = s"""
@@ -1371,7 +1371,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 404 if the the mail does not exist" in new TestEnvironment {
+      "returns 404 if the the mail does not exist" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1405,7 +1405,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 404)
       }
 
-      "return 410 if the the user does not exists" in new TestEnvironment {
+      "returns 410 if the the user does not exists" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1441,7 +1441,7 @@ class UserRoutesSpec
     }
 
     "support DELETE request to delete mail from user" which {
-      "return 200 if the mail was deleted" in new TestEnvironment {
+      "returns 200 if the mail was deleted" in new TestEnvironment {
         // given
         val updateUser = User(
           UserId(1),
@@ -1484,7 +1484,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 404 if the mail does not exist" in new TestEnvironment {
+      "returns 404 if the mail does not exist" in new TestEnvironment {
         // given
         when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn IO
           .raiseError(MailNotFoundError)
@@ -1503,7 +1503,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 404)
       }
 
-      "return 409 if there is just one mail left" in new TestEnvironment {
+      "returns 409 if there is just one mail left" in new TestEnvironment {
         // given
         when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn IO
           .raiseError(NotEnoughMailsError)
@@ -1522,7 +1522,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 409)
       }
 
-      "return 410 if the user does not exist" in new TestEnvironment {
+      "returns 410 if the user does not exist" in new TestEnvironment {
         // given
         when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn IO
           .raiseError(UserNotFoundError)
@@ -1545,7 +1545,7 @@ class UserRoutesSpec
 
   "/users/{userId}/numbers" should {
     "support POST request to add a number to user" which {
-      "return 201 if the number has been added" in new TestEnvironment {
+      "returns 201 if the number has been added" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1604,7 +1604,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if value is not present" in new TestEnvironment {
+      "returns 400 if value is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1629,7 +1629,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is null" in new TestEnvironment {
+      "returns 400 if value is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1655,7 +1655,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is empty" in new TestEnvironment {
+      "returns 400 if value is empty" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1681,7 +1681,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "number cannot be empty")
       }
 
-      "return 400 if value is too long" in new TestEnvironment {
+      "returns 400 if value is too long" in new TestEnvironment {
         // given
         val longNumber = "a" * 1000
         val requestBody = s"""
@@ -1712,7 +1712,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 404 if the the user does not exist" in new TestEnvironment {
+      "returns 404 if the the user does not exist" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1741,7 +1741,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 404)
       }
 
-      "return 409 if the the user has already too many numbers" in new TestEnvironment {
+      "returns 409 if the the user has already too many numbers" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1775,7 +1775,7 @@ class UserRoutesSpec
 
   "/users/{userId}/mails/id" should {
     "support PUT request to modify a number from an user" which {
-      "return 200 if the number has been modified" in new TestEnvironment {
+      "returns 200 if the number has been modified" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1839,7 +1839,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 400 if value is not present" in new TestEnvironment {
+      "returns 400 if value is not present" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1864,7 +1864,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is null" in new TestEnvironment {
+      "returns 400 if value is null" in new TestEnvironment {
         // given
         val requestBody = """
         {
@@ -1890,7 +1890,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "value must be present and not null")
       }
 
-      "return 400 if value is empty" in new TestEnvironment {
+      "returns 400 if value is empty" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1916,7 +1916,7 @@ class UserRoutesSpec
         verifyTextResponse(response, 400, "number cannot be empty")
       }
 
-      "return 400 if value is too long" in new TestEnvironment {
+      "returns 400 if value is too long" in new TestEnvironment {
         // given
         val longNumber = "a" * 1000
         val requestBody = s"""
@@ -1947,7 +1947,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 404 if the the number does not exist" in new TestEnvironment {
+      "returns 404 if the the number does not exist" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -1981,7 +1981,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 404)
       }
 
-      "return 410 if the the user does not exists" in new TestEnvironment {
+      "returns 410 if the the user does not exists" in new TestEnvironment {
         // given
         val requestBody = """
           {
@@ -2017,7 +2017,7 @@ class UserRoutesSpec
     }
 
     "support DELETE request to delete a number from user" which {
-      "return 200 if the number was deleted" in new TestEnvironment {
+      "returns 200 if the number was deleted" in new TestEnvironment {
         // given
         val updateUser = User(
           UserId(1),
@@ -2060,7 +2060,7 @@ class UserRoutesSpec
         )
       }
 
-      "return 404 if the number does not exist" in new TestEnvironment {
+      "returns 404 if the number does not exist" in new TestEnvironment {
         // given
         when(usecases.deleteNumberFromUser(UserId(1), NumberId(2))) thenReturn IO
           .raiseError(NumberNotFoundError)
@@ -2079,7 +2079,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 404)
       }
 
-      "return 409 if there is just one number left" in new TestEnvironment {
+      "returns 409 if there is just one number left" in new TestEnvironment {
         // given
         when(usecases.deleteNumberFromUser(UserId(1), NumberId(2))) thenReturn IO
           .raiseError(NotEnoughNumbersError)
@@ -2098,7 +2098,7 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 409)
       }
 
-      "return 410 if the user does not exist" in new TestEnvironment {
+      "returns 410 if the user does not exist" in new TestEnvironment {
         // given
         when(usecases.deleteNumberFromUser(UserId(1), NumberId(2))) thenReturn IO
           .raiseError(UserNotFoundError)
