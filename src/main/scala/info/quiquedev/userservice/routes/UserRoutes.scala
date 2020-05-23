@@ -49,9 +49,9 @@ object UserRoutes {
           case RequestBodyValidationError(errors) =>
             BadRequest(errors.toList.mkString(","))
         }.andHandleOtherErrors
-      case GET -> Root / "users" :? FirstNameDtoParamMatcher(firstNameDto) :? LastNameDtoParamMatcher(
+      case GET -> Root / "users" :? FirstNameMatcher(firstNameDto) :? LastNameMatcher(
             lastNameDto
-          ) :? SearchLimitDtoOptionalParamMatcher(searchLimitDto) =>
+          ) :? SearchLimitMatcher(searchLimitDto) =>
         (for {
           searchLimit <- SearchLimitDto.toDomainF(searchLimitDto)
           firstName <- FirstNameDto.toDomainF(firstNameDto)
@@ -206,20 +206,20 @@ private object Codec {
   implicit val firstNameDtoQueryParamDecoder: QueryParamDecoder[FirstNameDto] =
     QueryParamDecoder[String].map(FirstNameDto.apply)
 
-  object FirstNameDtoParamMatcher
+  object FirstNameMatcher
       extends QueryParamDecoderMatcher[FirstNameDto]("firstName")
 
   implicit val lastNameDtoQueryParamDecoder: QueryParamDecoder[LastNameDto] =
     QueryParamDecoder[String].map(LastNameDto.apply)
 
-  object LastNameDtoParamMatcher
+  object LastNameMatcher
       extends QueryParamDecoderMatcher[LastNameDto]("lastName")
 
   implicit val searchLimitDtoOptionalQueryParamDecoder
       : QueryParamDecoder[SearchLimitDto] =
     QueryParamDecoder[Int].map(SearchLimitDto.apply)
 
-  object SearchLimitDtoOptionalParamMatcher
+  object SearchLimitMatcher
       extends OptionalQueryParamDecoderMatcher[SearchLimitDto]("searchLimit")
 
 }
