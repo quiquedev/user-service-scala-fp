@@ -1,52 +1,23 @@
 package info.quiquedev.userservice.usecases
 
-import cats.implicits._
-import org.scalatest.wordspec.AnyWordSpec
 import cats.effect.IO
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneId
+import com.dimafeng.testcontainers.{ContainerDef, PostgreSQLContainer}
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
-import com.dimafeng.testcontainers.PostgreSQLContainer
-import com.dimafeng.testcontainers.ContainerDef
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.OptionValues
-import doobie.util.transactor.Transactor
-import doobie._
 import doobie.implicits._
-import doobie.implicits.legacy.instant._
-import info.quiquedev.userservice.usecases.domain.{
-  NewUser,
-  User,
-  UserId,
-  FirstName,
-  LastName,
-  SearchLimit,
-  Mail,
-  MailId,
-  MailWithId,
-  Number,
-  NumberId,
-  NumberWithId,
-  UserUsecasesError,
-  UserNotFoundError
-}
-import info.quiquedev.userservice.usecases.domain.TooManyMailsError
-import info.quiquedev.userservice.usecases.domain.MailNotFoundError
-import info.quiquedev.userservice.usecases.domain.NotEnoughMailsError
-import info.quiquedev.userservice.usecases.domain.TooManyNumbersError
-import info.quiquedev.userservice.usecases.domain.NumberNotFoundError
-import info.quiquedev.userservice.usecases.domain.NotEnoughNumbersError
+import doobie.util.transactor.Transactor
+import info.quiquedev.userservice.usecases.domain._
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 class UserUsecasesSpec
     extends AnyWordSpec
     with Matchers
     with OptionValues
     with TestContainerForAll {
-  import UserUsecases._
 
-  private implicit var xa: Transactor[IO] = null
-  private var usecases: UserUsecases[IO] = null
+  private implicit var xa: Transactor[IO] = _
+  private var usecases: UserUsecases[IO] = _
 
   override val containerDef: ContainerDef =
     PostgreSQLContainer.Def("postgres:12")
@@ -55,7 +26,7 @@ class UserUsecasesSpec
     super.afterContainersStart(container)
 
     container match {
-      case pgContainer: PostgreSQLContainer => {
+      case pgContainer: PostgreSQLContainer =>
         import pgContainer._
 
         xa = FlywayMigrator.migrateDbAndGetTransactorIO(
@@ -64,7 +35,6 @@ class UserUsecasesSpec
           password
         )
         usecases = UserUsecases.impl[IO]
-      }
     }
   }
 
@@ -90,7 +60,7 @@ class UserUsecasesSpec
         // then
         result.firstName should be(newUser.firstName)
         result.lastName should be(newUser.lastName)
-        result.emails.map(_.mail) should contain theSameElementsAs (newUser.emails)
+        result.emails.map(_.mail) should contain theSameElementsAs newUser.emails
         result.phoneNumbers.map(_.number) should contain theSameElementsAs newUser.phoneNumbers
       }
     }
@@ -183,8 +153,6 @@ class UserUsecasesSpec
       }
 
       "returns empty result if there was no match" in {
-        // given
-        val unexistingUser = UserId(1)
 
         // when
         val result =

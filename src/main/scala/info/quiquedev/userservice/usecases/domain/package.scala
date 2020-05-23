@@ -1,10 +1,9 @@
 package info.quiquedev.userservice.usecases
 
 import doobie.util.meta.Meta
-import org.postgresql.util.PGobject
 import io.circe._
-import io.circe.syntax._
 import io.circe.parser._
+import org.postgresql.util.PGobject
 
 package object domain {
   def jsonCoderOf[A: Encoder: Decoder]: Meta[A] = {

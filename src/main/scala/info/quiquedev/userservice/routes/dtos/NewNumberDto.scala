@@ -1,13 +1,10 @@
 package info.quiquedev.userservice.routes.dtos
 
-import cats.data.{NonEmptyList, Validated}
-import cats.implicits._
-import io.circe.generic.extras.decoding.UnwrappedDecoder.decodeUnwrapped
-import io.circe.generic.extras.encoding.UnwrappedEncoder.encodeUnwrapped
-import io.circe.{Decoder, Encoder}
-import cats.effect.Sync
-import info.quiquedev.userservice.usecases.domain.Number
+import cats.data.NonEmptyList
 import cats.data.Validated._
+import cats.effect.Sync
+import cats.implicits._
+import info.quiquedev.userservice.usecases.domain.Number
 
 final case class NewNumberDto(value: Option[NumberDto])
 

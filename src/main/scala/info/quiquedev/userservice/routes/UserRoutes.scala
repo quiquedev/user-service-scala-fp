@@ -5,15 +5,17 @@ import cats.implicits._
 import info.quiquedev.userservice.routes.dtos.{
   FirstNameDto,
   LastNameDto,
+  NewMailDto,
+  NewNumberDto,
   NewUserDto,
-  RequestBodyValidationError,
   QueryParamValidationError,
+  RequestBodyValidationError,
   SearchLimitDto,
   UserDto,
   UsersDto
 }
 import info.quiquedev.userservice.usecases.UserUsecases
-import info.quiquedev.userservice.usecases.domain._
+import info.quiquedev.userservice.usecases.domain.{TooManyMailsError, _}
 import io.circe.generic.auto._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -22,10 +24,6 @@ import org.http4s.dsl.impl.{
   QueryParamDecoderMatcher
 }
 import org.http4s.{HttpRoutes, _}
-import info.quiquedev.userservice.routes.dtos.MailDto
-import info.quiquedev.userservice.routes.dtos.NewMailDto
-import info.quiquedev.userservice.usecases.domain.TooManyMailsError
-import info.quiquedev.userservice.routes.dtos.NewNumberDto
 
 object UserRoutes {
   import Codec._
@@ -34,9 +32,9 @@ object UserRoutes {
     val U = UserUsecases[F]
     val dsl = new Http4sDsl[F] {}
 
+    import U._
     import UserDto._
     import dsl._
-    import U._
 
     HttpRoutes.of[F] {
       case req @ POST -> Root / "users" =>
@@ -157,9 +155,9 @@ object UserRoutes {
           )
           response <- Ok(updatedUser.toDto)
         } yield response).recoverWith {
-          case NumberNotFoundError => NotFound()
-          case NotEnoughNumbersError    => Conflict()
-          case UserNotFoundError   => Gone()
+          case NumberNotFoundError   => NotFound()
+          case NotEnoughNumbersError => Conflict()
+          case UserNotFoundError     => Gone()
         }
     }
   }

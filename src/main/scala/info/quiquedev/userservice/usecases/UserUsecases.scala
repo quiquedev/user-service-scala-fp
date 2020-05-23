@@ -1,38 +1,32 @@
 package info.quiquedev.userservice.usecases
 
+import cats.ApplicativeError
 import cats.data.NonEmptyList
-import info.quiquedev.userservice.usecases.domain.{
-  NewUser,
-  User,
-  UserId,
-  FirstName,
-  LastName,
-  SearchLimit,
-  Mail,
-  MailId,
-  MailWithId,
-  Number,
-  NumberId,
-  NumberWithId
-}
+import cats.effect.Async
 import cats.implicits._
-import java.time.Instant
 import doobie._
 import doobie.implicits._
-import cats.effect.Async
-import cats.ApplicativeError
-import io.circe._
-import io.circe.syntax._
-import io.circe.generic.auto._
-import io.circe.parser._
-import info.quiquedev.userservice.usecases.domain.UserNotFoundError
-import info.quiquedev.userservice.usecases.domain._
-import info.quiquedev.userservice.usecases.domain.DbError
-import info.quiquedev.userservice.usecases._
 import info.quiquedev.userservice._
-import info.quiquedev.userservice.usecases.domain.TooManyMailsError
-import info.quiquedev.userservice.usecases.domain.MailNotFoundError
-import info.quiquedev.userservice.usecases.domain.TooManyNumbersError
+import info.quiquedev.userservice.usecases.domain.{
+  DbError,
+  FirstName,
+  LastName,
+  Mail,
+  MailId,
+  MailNotFoundError,
+  MailWithId,
+  NewUser,
+  Number,
+  NumberId,
+  NumberWithId,
+  SearchLimit,
+  TooManyMailsError,
+  TooManyNumbersError,
+  User,
+  UserId,
+  UserNotFoundError,
+  _
+}
 
 trait UserUsecases[F[_]] {
   def createUser(newUser: NewUser): F[User]
@@ -204,8 +198,9 @@ object UserUsecases {
             numbers: NumbersWithId
         ): ConnectionIO[NumbersWithId] =
           numbers.find(_.id == number.id) match {
-            case Some(oldNumber) => (numbers - oldNumber + number).pure[ConnectionIO]
-            case None    => CAE.raiseError(NumberNotFoundError)
+            case Some(oldNumber) =>
+              (numbers - oldNumber + number).pure[ConnectionIO]
+            case None => CAE.raiseError(NumberNotFoundError)
           }
 
         (for {

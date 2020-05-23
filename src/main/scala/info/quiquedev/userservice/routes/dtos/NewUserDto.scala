@@ -4,8 +4,8 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated}
 import cats.effect.Sync
 import cats.implicits._
-import info.quiquedev.userservice.usecases.domain._
 import info.quiquedev.userservice._
+import info.quiquedev.userservice.usecases.domain._
 
 final case class NewUserDto(
     firstName: Option[FirstNameDto],
