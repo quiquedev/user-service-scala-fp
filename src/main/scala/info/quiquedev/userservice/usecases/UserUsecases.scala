@@ -126,10 +126,13 @@ object UserUsecases {
       def addMailToUser(userId: UserId, mail: Mail): F[User] = {
         def addMail(mails: MailsWithId): ConnectionIO[MailsWithId] =
           if (mails.size >= MaxMailsPerUser) CAE.raiseError(TooManyMailsError)
-          else {
-            val mailId = MailId(mails.maxBy(_.id.value).id.value + 1)
-            (mails + MailWithId(mailId, mail)).pure[ConnectionIO]
-          }
+          else
+            mails.find(_.mail == mail) match {
+              case None =>
+                val mailId = MailId(mails.maxBy(_.id.value).id.value + 1)
+                (mails + MailWithId(mailId, mail)).pure[ConnectionIO]
+              case Some(_) => mails.pure[ConnectionIO]
+            }
 
         (for {
           mails <- userMails(userId)
@@ -174,10 +177,13 @@ object UserUsecases {
         ): ConnectionIO[NumbersWithId] =
           if (numbers.size == MaxNumbersPerUser)
             CAE.raiseError(TooManyNumbersError)
-          else {
-            val numberId = NumberId(numbers.maxBy(_.id.value).id.value + 1)
-            (numbers + NumberWithId(numberId, number)).pure[ConnectionIO]
-          }
+          else
+            numbers.find(_.number == number) match {
+              case None =>
+                val numberId = NumberId(numbers.maxBy(_.id.value).id.value + 1)
+                (numbers + NumberWithId(numberId, number)).pure[ConnectionIO]
+              case Some(_) => numbers.pure[ConnectionIO]
+            }
 
         (for {
           numbers <- userNumbers(userId)

@@ -205,7 +205,7 @@ paths:
           description: request validation error. check response for details.
 
   /users/{userId}/numbers/{numberId}:
-    patch:
+    put:
       summary: modifies a number of an user
       parameters:
         - in: path
