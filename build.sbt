@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
     organization := "info.quiquedev",
     name := "user-service",
     version := "0.0.1-SNAPSHOT",
-    scalaVersion := "2.13.1",
+    scalaVersion := "2.13.2",
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-blaze-server" % Http4sVersion,
       "org.http4s" %% "http4s-blaze-client" % Http4sVersion,
@@ -38,8 +38,7 @@ lazy val root = (project in file("."))
     // assembly
     test in assembly := {},
     mainClass in assembly := Some("info.quiquedev.userservice.Main"),
-    assemblyJarName in assembly := "user-service.jar",
-    coverageEnabled := true
+    assemblyJarName in assembly := "user-service.jar"
   )
 
 scalacOptions ++= Seq(

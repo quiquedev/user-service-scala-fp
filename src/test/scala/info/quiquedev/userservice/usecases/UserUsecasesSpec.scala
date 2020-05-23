@@ -20,7 +20,7 @@ class UserUsecasesSpec
   private var usecases: UserUsecases[IO] = _
 
   override val containerDef: ContainerDef =
-    PostgreSQLContainer.Def("postgres:12")
+    PostgreSQLContainer.Def("postgres:12.2")
 
   override def afterContainersStart(container: Containers): Unit = {
     super.afterContainersStart(container)

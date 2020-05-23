@@ -1,7 +1,6 @@
 package info.quiquedev.userservice.usecases
 
 import cats.ApplicativeError
-import cats.data.NonEmptyList
 import cats.effect.Async
 import cats.implicits._
 import doobie._
@@ -65,9 +64,6 @@ trait UserUsecases[F[_]] {
 }
 
 object UserUsecases {
-  private type AdditionalData =
-    (NonEmptyList[MailWithId], NonEmptyList[NumberWithId])
-
   def apply[F[_]](implicit ev: UserUsecases[F]) = ev
 
   def impl[F[_]: Async](implicit xa: Transactor[F]): UserUsecases[F] =
