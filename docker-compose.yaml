@@ -25,4 +25,4 @@ services:
       DB_FLYWAY_PASSWORD: flyway_password
       DB_APP_USER: app_user
       DB_APP_PASSWORD: app_password
-    command: ["./wait-for-postgres.sh", "java", "-jar", "user-service.jar"]
+    command: ["./wait-for-postgres-and-start-app.sh"]
