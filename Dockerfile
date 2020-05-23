@@ -8,8 +8,9 @@ COPY . .
 
 RUN sbt assembly
 
-RUN chmod +x ./scripts/*.sh
+RUN cp ./scripts/wait-for-postgres.sh .
+RUN chmod +x wait-for-postgres.sh
 
 RUN cp ./target/scala-2.13/user-service.jar .
 
-CMD ["./scripts/run-app.sh"]
+CMD ["java", "-jar", "user-service.jar"]

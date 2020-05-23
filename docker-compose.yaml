@@ -18,10 +18,11 @@ services:
       - "8080:8080"
     environment:
       DB_JDBC_URL: "jdbc:postgresql://db/user-service-local"
-      DB_HOST: "db"
+      DB_HOST: db
       DB_PORT: 5432
       DB_DATABASE: "user-service-local"
       DB_FLYWAY_USER: flyway_user
       DB_FLYWAY_PASSWORD: flyway_password
       DB_APP_USER: app_user
       DB_APP_PASSWORD: app_password
+    command: ["./wait-for-postgres.sh", "java", "-jar", "user-service.jar"]

@@ -10,9 +10,9 @@ You can find the *OpenAPI* specification [here](openapi.yaml).
 You must have `docker` and `docker-compose` installed in your machine.
 
 ### How to
-Just run the following command from the project root: 
-
 ```
+git clone git@github.com:quiquedev/user-service.git
+cd user-service
 docker-compose up --build
 ```
 

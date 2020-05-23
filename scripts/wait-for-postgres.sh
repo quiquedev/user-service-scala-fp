@@ -3,11 +3,13 @@
 
 set -e
   
-PGUSER=$DB_FLYWAY_USER
-PGPASSWORD=$DB_FLYWAY_PASSWORD
+cmd="$@"
 
-until  psql -h $DB_HOST -d $DB_DATABASE -c '\q'; do
+until PGPASSWORD=$DB_FLYWAY_PASSWORD psql -h $DB_HOST -p $DB_PORT -d $DB_DATABASE -U $DB_FLYWAY_USER -c '\q'; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
 done
+
+>&2 echo "Postgres is up - executing command"
+exec $cmd
 
