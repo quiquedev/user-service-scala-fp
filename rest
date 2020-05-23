@@ -1,0 +1,25 @@
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "lastName": "molina",
+  "firstName": "enrique",
+  "emails": [
+    "enrique1@gmail.com"
+  ],
+  "phoneNumbers": [
+    "1"
+  ]
+}
+
+#####
+GET http://localhost:8080/users?firstName=enrIque&lastName=&searchLimit=
+
+
+#########
+POST http://localhost:8080/users/5/mails
+Content-Type: application/json
+
+{
+  "value": "lala"
+}

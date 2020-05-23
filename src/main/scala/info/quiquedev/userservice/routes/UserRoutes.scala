@@ -24,13 +24,15 @@ import org.http4s.dsl.impl.{
   QueryParamDecoderMatcher
 }
 import org.http4s.{HttpRoutes, _}
+import info.quiquedev.userservice.Logger
 
 object UserRoutes {
   import Codec._
 
   def value[F[_]: Sync: UserUsecases]: HttpRoutes[F] = {
     val U = UserUsecases[F]
-    val dsl = new Http4sDsl[F] {}
+    implicit val L = Logger.impl[F]("UserRoutes")
+    implicit val dsl = new Http4sDsl[F] {}
 
     import U._
     import UserDto._
@@ -46,7 +48,7 @@ object UserRoutes {
         } yield response).recoverWith {
           case RequestBodyValidationError(errors) =>
             BadRequest(errors.toList.mkString(","))
-        }
+        }.andHandleOtherErrors
       case GET -> Root / "users" :? FirstNameDtoParamMatcher(firstNameDto) :? LastNameDtoParamMatcher(
             lastNameDto
           ) :? SearchLimitDtoOptionalParamMatcher(searchLimitDto) =>
@@ -59,12 +61,12 @@ object UserRoutes {
         } yield response).recoverWith {
           case QueryParamValidationError(errors) =>
             BadRequest(errors.toList.mkString("|"))
-        }
+        }.andHandleOtherErrors
       case GET -> Root / "users" / IntVar(userId) =>
-        for {
+        (for {
           maybeUser <- findUserById(UserId(userId))
           response <- maybeUser.map(u => Ok(u.toDto)).getOrElse(NotFound())
-        } yield response
+        } yield response).andHandleOtherErrors
 
       case DELETE -> Root / "users" / IntVar(userId) =>
         (for {
@@ -72,7 +74,7 @@ object UserRoutes {
           response <- Ok()
         } yield response).recoverWith {
           case UserNotFoundError => NotFound()
-        }
+        }.andHandleOtherErrors
       case req @ POST -> Root / "users" / IntVar(userId) / "mails" =>
         (for {
           newMailDto <- req.as[NewMailDto]
@@ -84,7 +86,7 @@ object UserRoutes {
             BadRequest(errors.toList.mkString("|"))
           case UserNotFoundError => NotFound()
           case TooManyMailsError => Conflict()
-        }
+        }.andHandleOtherErrors
       case req @ PUT -> Root / "users" / IntVar(userId) / "mails" / IntVar(
             mailId
           ) =>
@@ -101,7 +103,7 @@ object UserRoutes {
             BadRequest(errors.toList.mkString("|"))
           case MailNotFoundError => NotFound()
           case UserNotFoundError => Gone()
-        }
+        }.andHandleOtherErrors
       case DELETE -> Root / "users" / IntVar(userId) / "mails" / IntVar(
             mailId
           ) =>
@@ -115,7 +117,7 @@ object UserRoutes {
           case MailNotFoundError   => NotFound()
           case NotEnoughMailsError => Conflict()
           case UserNotFoundError   => Gone()
-        }
+        }.andHandleOtherErrors
       case req @ POST -> Root / "users" / IntVar(userId) / "numbers" =>
         (for {
           newNumberDto <- req.as[NewNumberDto]
@@ -127,7 +129,7 @@ object UserRoutes {
             BadRequest(errors.toList.mkString("|"))
           case UserNotFoundError   => NotFound()
           case TooManyNumbersError => Conflict()
-        }
+        }.andHandleOtherErrors
       case req @ PUT -> Root / "users" / IntVar(userId) / "numbers" / IntVar(
             numberId
           ) =>
@@ -144,7 +146,7 @@ object UserRoutes {
             BadRequest(errors.toList.mkString("|"))
           case NumberNotFoundError => NotFound()
           case UserNotFoundError   => Gone()
-        }
+        }.andHandleOtherErrors
       case DELETE -> Root / "users" / IntVar(userId) / "numbers" / IntVar(
             numberId
           ) =>
@@ -158,7 +160,26 @@ object UserRoutes {
           case NumberNotFoundError   => NotFound()
           case NotEnoughNumbersError => Conflict()
           case UserNotFoundError     => Gone()
-        }
+        }.andHandleOtherErrors
+    }
+  }
+
+  private implicit final class ResponseExtensions[F[_]](
+      val value: F[Response[F]]
+  ) extends AnyVal {
+    def andHandleOtherErrors(
+        implicit D: Http4sDsl[F],
+        L: Logger[F],
+        S: Sync[F]
+    ): F[Response[F]] = {
+      import D._
+
+      value.recoverWith {
+        case unhandledError =>
+          L.error("unhandled error", unhandledError) *> InternalServerError(
+            "something bad happened! please try later or contact our team"
+          )
+      }
     }
   }
 }
