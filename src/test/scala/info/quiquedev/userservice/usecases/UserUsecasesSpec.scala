@@ -224,6 +224,27 @@ class UserUsecasesSpec
         findUserInDb(user.id).value should be(expectedUpdatedUser)
       }
 
+      "returns the unmodified user if the mail already exists" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newMail = Mail("enrique@gmail.com")
+
+        // when
+        val result = usecases.addMailToUser(user.id, newMail).unsafeRunSync()
+
+        // then
+        result should be(user)
+        findUserInDb(user.id).value should be(user)
+      }
+
       "fails if the user does not exist" in {
         // given
         val nonExistingUserId = UserId(1)
@@ -419,6 +440,28 @@ class UserUsecasesSpec
 
         result should be(expectedUpdatedUser)
         findUserInDb(user.id).value should be(expectedUpdatedUser)
+      }
+
+      "returns the unmodified user if the number already exists" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newNumber = Number("55555")
+
+        // when
+        val result =
+          usecases.addNumberToUser(user.id, newNumber).unsafeRunSync()
+
+        // then
+        result should be(user)
+        findUserInDb(user.id).value should be(user)
       }
 
       "fails if the user does not exist" in {
