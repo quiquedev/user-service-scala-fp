@@ -178,6 +178,8 @@ paths:
                   $ref: '#/components/schemas/User'
         '404':
           description: mail not found for user
+        '409':
+          description: user has only one mail left
         '410':
           description: user not found
 
@@ -259,10 +261,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-        '400':
-          description: request validation error. check response for details.
         '404':
           description: number not found for user
+        '409':
+          description: user has only one number left
         '410':
           description: user not found
 

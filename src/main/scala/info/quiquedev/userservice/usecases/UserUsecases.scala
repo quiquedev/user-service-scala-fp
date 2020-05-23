@@ -135,7 +135,7 @@ object UserUsecases {
 
       def addMailToUser(userId: UserId, mail: Mail): F[User] = {
         def addMail(mails: MailsWithId): ConnectionIO[MailsWithId] =
-          if (mails.size == MaxMailsPerUser) CAE.raiseError(TooManyMailsError)
+          if (mails.size >= MaxMailsPerUser) CAE.raiseError(TooManyMailsError)
           else {
             val mailId = MailId(mails.maxBy(_.id.value).id.value + 1)
             (mails + MailWithId(mailId, mail)).pure[ConnectionIO]
@@ -164,12 +164,12 @@ object UserUsecases {
 
       def deleteMailFromUser(userId: UserId, mailId: MailId): F[User] = {
         def deleteMail(mails: MailsWithId): ConnectionIO[MailsWithId] =
-          if (mails.size == 1) CAE.raiseError(NotEnoughMailsError)
-          else
-            mails.find(_.id == mailId) match {
-              case Some(mail) => (mails - mail).pure[ConnectionIO]
-              case None       => CAE.raiseError(MailNotFoundError)
-            }
+          mails.find(_.id == mailId) match {
+            case Some(mail) =>
+              if (mails.size == 1) CAE.raiseError(NotEnoughMailsError)
+              else (mails - mail).pure[ConnectionIO]
+            case None => CAE.raiseError(MailNotFoundError)
+          }
 
         (for {
           mails <- userMails(userId)
@@ -204,7 +204,7 @@ object UserUsecases {
             numbers: NumbersWithId
         ): ConnectionIO[NumbersWithId] =
           numbers.find(_.id == number.id) match {
-            case Some(_) => (numbers + number).pure[ConnectionIO]
+            case Some(oldNumber) => (numbers - oldNumber + number).pure[ConnectionIO]
             case None    => CAE.raiseError(NumberNotFoundError)
           }
 
@@ -220,8 +220,10 @@ object UserUsecases {
             numbers: NumbersWithId
         ): ConnectionIO[NumbersWithId] =
           numbers.find(_.id == numberId) match {
-            case Some(number) => (numbers - number).pure[ConnectionIO]
-            case None         => CAE.raiseError(NumberNotFoundError)
+            case Some(number) =>
+              if (numbers.size == 1) CAE.raiseError(NotEnoughNumbersError)
+              else (numbers - number).pure[ConnectionIO]
+            case None => CAE.raiseError(NumberNotFoundError)
           }
 
         (for {

@@ -114,8 +114,9 @@ object UserRoutes {
           )
           response <- Ok(updatedUser.toDto)
         } yield response).recoverWith {
-          case MailNotFoundError => NotFound()
-          case UserNotFoundError => Gone()
+          case MailNotFoundError   => NotFound()
+          case NotEnoughMailsError => Conflict()
+          case UserNotFoundError   => Gone()
         }
       case req @ POST -> Root / "users" / IntVar(userId) / "numbers" =>
         (for {
@@ -157,6 +158,7 @@ object UserRoutes {
           response <- Ok(updatedUser.toDto)
         } yield response).recoverWith {
           case NumberNotFoundError => NotFound()
+          case NotEnoughNumbersError    => Conflict()
           case UserNotFoundError   => Gone()
         }
     }

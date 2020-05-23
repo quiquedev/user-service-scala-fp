@@ -34,6 +34,9 @@ import info.quiquedev.userservice.usecases.domain.{
 import info.quiquedev.userservice.usecases.domain.TooManyMailsError
 import info.quiquedev.userservice.usecases.domain.MailNotFoundError
 import info.quiquedev.userservice.usecases.domain.NotEnoughMailsError
+import info.quiquedev.userservice.usecases.domain.TooManyNumbersError
+import info.quiquedev.userservice.usecases.domain.NumberNotFoundError
+import info.quiquedev.userservice.usecases.domain.NotEnoughNumbersError
 
 class UserUsecasesSpec
     extends AnyWordSpec
@@ -270,15 +273,12 @@ class UserUsecasesSpec
           NewUser(
             FirstName("enrique"),
             LastName("molina"),
-            (1 until 10).map(i => Mail(s"mail$i@gmail.com")).toSet,
+            (0 until 10).map(i => Mail(s"mail$i@gmail.com")).toSet,
             Set(Number("55555"))
           )
         )
 
         val newMail = Mail("enrique@yahoo.com")
-
-        // when
-        val result = usecases.addMailToUser(user.id, newMail).unsafeRunSync()
 
         // then
         an[TooManyMailsError.type] should be thrownBy usecases
@@ -392,7 +392,7 @@ class UserUsecasesSpec
           NewUser(
             FirstName("enrique"),
             LastName("molina"),
-            Set(Mail("enrique@yahoo.com"), Mail("enrique@gmail.com")),
+            Set(Mail("enrique@yahoo.com")),
             Set(Number("55555"))
           )
         )
@@ -421,6 +421,205 @@ class UserUsecasesSpec
         // then
         an[NotEnoughMailsError.type] should be thrownBy usecases
           .deleteMailFromUser(user.id, mailIdToDelete)
+          .unsafeRunSync()
+      }
+    }
+
+    "provide with a addNumberToUser method to add a number to an user" which {
+      "returns the updated user" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newNumber = Number("66666")
+
+        // when
+        val result =
+          usecases.addNumberToUser(user.id, newNumber).unsafeRunSync()
+
+        // then
+        val expectedUpdatedUser =
+          user.copy(phoneNumbers =
+            user.phoneNumbers + NumberWithId(NumberId(1), newNumber)
+          )
+
+        result should be(expectedUpdatedUser)
+        findUserInDb(user.id).value should be(expectedUpdatedUser)
+      }
+
+      "fails if the user does not exist" in {
+        // given
+        val nonExistingUserId = UserId(1)
+        val newNumber = Number("55555")
+
+        // then
+        an[UserNotFoundError.type] should be thrownBy usecases
+          .addNumberToUser(nonExistingUserId, newNumber)
+          .unsafeRunSync()
+      }
+
+      "fails if the user has already too many numbers" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            (0 until 10).map(i => Number(i.toString)).toSet
+          )
+        )
+
+        val newNumber = Number("20")
+
+        // then
+        an[TooManyNumbersError.type] should be thrownBy usecases
+          .addNumberToUser(user.id, newNumber)
+          .unsafeRunSync()
+      }
+    }
+
+    "provide with a updateNumberFromUser method to update an existing number of an user" which {
+      "returns the updated user" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newNumberWithId =
+          user.phoneNumbers.head.copy(number = Number("11111"))
+
+        // when
+        val result =
+          usecases
+            .updateNumberFromUser(user.id, newNumberWithId)
+            .unsafeRunSync()
+
+        // then
+        val expectedUpdatedUser =
+          user.copy(phoneNumbers = Set(newNumberWithId))
+
+        result should be(expectedUpdatedUser)
+        findUserInDb(user.id).value should be(expectedUpdatedUser)
+      }
+
+      "fails if the user does not exist" in {
+        // given
+        val nonExistingUserId = UserId(1)
+        val newNumberWithId = NumberWithId(NumberId(1), Number("55555"))
+
+        // then
+        an[UserNotFoundError.type] should be thrownBy usecases
+          .updateNumberFromUser(nonExistingUserId, newNumberWithId)
+          .unsafeRunSync()
+      }
+
+      "fails if the number does not exist" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newNumberWithNonExistingId =
+          NumberWithId(NumberId(5), Number("88888"))
+
+        // then
+        an[NumberNotFoundError.type] should be thrownBy usecases
+          .updateNumberFromUser(user.id, newNumberWithNonExistingId)
+          .unsafeRunSync()
+
+      }
+    }
+
+    "provide with a deleteNumberFromUser method to delete an existing number from an user" which {
+      "returns the updated user" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@yahoo.com")),
+            Set(Number("55555"), Number("66666"))
+          )
+        )
+
+        val numberWithIdToDelete = user.phoneNumbers.head
+
+        // when
+        val result =
+          usecases
+            .deleteNumberFromUser(user.id, numberWithIdToDelete.id)
+            .unsafeRunSync()
+
+        // then
+        val expectedUpdatedUser =
+          user.copy(phoneNumbers = user.phoneNumbers - numberWithIdToDelete)
+
+        result should be(expectedUpdatedUser)
+        findUserInDb(user.id).value should be(expectedUpdatedUser)
+      }
+
+      "fails if the user does not exist" in {
+        // given
+        val nonExistingUserId = UserId(1)
+        val numberIdToDelete = NumberId(1)
+
+        // then
+        an[UserNotFoundError.type] should be thrownBy usecases
+          .deleteNumberFromUser(nonExistingUserId, numberIdToDelete)
+          .unsafeRunSync()
+      }
+
+      "fails if the number does not exist" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@yahoo.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val numberIdToDelete = NumberId(25)
+
+        // then
+        an[NumberNotFoundError.type] should be thrownBy usecases
+          .deleteNumberFromUser(user.id, numberIdToDelete)
+          .unsafeRunSync()
+      }
+
+      "fails if the user only has one number left" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@yahoo.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val numberIdToDelete = user.phoneNumbers.head.id
+
+        // then
+        an[NotEnoughNumbersError.type] should be thrownBy usecases
+          .deleteNumberFromUser(user.id, numberIdToDelete)
           .unsafeRunSync()
       }
     }

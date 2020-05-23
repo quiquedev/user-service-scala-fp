@@ -1503,6 +1503,25 @@ class UserRoutesSpec
         verifyEmptyResponse(response, 404)
       }
 
+      "return 409 if there is just one mail left" in new TestEnvironment {
+        // given
+        when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn IO
+          .raiseError(NotEnoughMailsError)
+
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.DELETE,
+                uri = uri"/users/1/mails/2"
+              )
+            )
+            .value
+
+        // then
+        verifyEmptyResponse(response, 409)
+      }
+
       "return 410 if the user does not exist" in new TestEnvironment {
         // given
         when(usecases.deleteMailFromUser(UserId(1), MailId(2))) thenReturn IO
@@ -2058,6 +2077,25 @@ class UserRoutesSpec
 
         // then
         verifyEmptyResponse(response, 404)
+      }
+
+      "return 409 if there is just one number left" in new TestEnvironment {
+        // given
+        when(usecases.deleteNumberFromUser(UserId(1), NumberId(2))) thenReturn IO
+          .raiseError(NotEnoughNumbersError)
+
+        val response =
+          routes
+            .run(
+              Request[IO](
+                method = Method.DELETE,
+                uri = uri"/users/1/numbers/2"
+              )
+            )
+            .value
+
+        // then
+        verifyEmptyResponse(response, 409)
       }
 
       "return 410 if the user does not exist" in new TestEnvironment {

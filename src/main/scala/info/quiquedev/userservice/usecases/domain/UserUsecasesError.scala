@@ -8,6 +8,6 @@ final case object NumberNotFoundError extends UserUsecasesError
 final case object TooManyMailsError extends UserUsecasesError
 final case object NotEnoughMailsError extends UserUsecasesError
 final case object TooManyNumbersError extends UserUsecasesError
-final case object NotEnoughNumbers extends UserUsecasesError
+final case object NotEnoughNumbersError extends UserUsecasesError
 final case class DbJsonCodingError(t: Throwable) extends UserUsecasesError
 final case class DbError(msg: String) extends UserUsecasesError
