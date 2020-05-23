@@ -8,35 +8,117 @@ import doobie.implicits._
 import info.quiquedev.userservice._
 import info.quiquedev.userservice.usecases.domain._
 
+/**
+  * Provides operations to manipulate users.
+  * Effects are safely wrapped in F[_] which might return results
+  * or raise errors.
+  *
+  * Note: errors are documented as `@throws` doc statements.
+  */
 trait UserUsecases[F[_]] {
+
+  /**
+    * creates a new user
+    * @return user created
+    */
   def createUser(newUser: NewUser): F[User]
+
+  /**
+    * find an user by the user id
+    *
+    * @return the found user or none if no user was found
+    */
   def findUserById(userId: UserId): F[Option[User]]
+
+  /**
+    * finds a limited number of users by the last and the first name
+    * the search is case insensitive
+    *
+    * @return the users found
+    */
   def findUsersByName(
       firstName: FirstName,
       lastName: LastName,
       searchLimit: SearchLimit
   ): F[Set[User]]
+
+  /**
+    * delete a user by the user id
+    *
+    * @throws info.quiquedev.userservice.usecases.domain.UserNotFoundError if the user does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.DbError if there was more than one user in the db
+    */
   def deleteUserById(userId: UserId): F[Unit]
+
+  /**
+    * adds a mail to an existing user
+    *
+    * @return the updated user
+    * @throws info.quiquedev.userservice.usecases.domain.UserNotFoundError if the user does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.TooManyMailsError if the user has already max number of mails
+    */
   def addMailToUser(
       userId: UserId,
       mail: Mail
   ): F[User]
+
+  /**
+    * updates an existing mail of an user
+    *
+    * @return the updated user
+    * @throws info.quiquedev.userservice.usecases.domain.UserNotFoundError if the user does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.MailNotFoundError if the mail does not exist
+    */
   def updateMailFromUser(
       userId: UserId,
       mail: MailWithId
   ): F[User]
+
+  /**
+    * deletes an existing mail of an user
+    *
+    * @return the updated user
+    * @throws info.quiquedev.userservice.usecases.domain.UserNotFoundError if the user does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.MailNotFoundError if the mail does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.NotEnoughMailsError if there is just one mail left
+    */
   def deleteMailFromUser(
       userId: UserId,
       mailId: MailId
   ): F[User]
+
+  /**
+    * adds a number to an existing user
+    *
+    * @return the updated user
+    * @throws info.quiquedev.userservice.usecases.domain.UserNotFoundError if the user does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.TooManyNumbersError if the user has already max number of numbers
+    */
   def addNumberToUser(
       userId: UserId,
       number: Number
   ): F[User]
+
+  /**
+    * updates an existing number of an user
+    *
+    * @return the updated user
+    * @throws info.quiquedev.userservice.usecases.domain.UserNotFoundError if the user does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.NumberNotFoundError if the number does not exist
+    */
   def updateNumberFromUser(
       userId: UserId,
       number: NumberWithId
   ): F[User]
+
+  /**
+    * deletes an existing number of an user
+    *
+    * @return the updated user
+    * @throws info.quiquedev.userservice.usecases.domain.UserNotFoundError if the user does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.NumberNotFoundError if the number does not exist
+    * @throws info.quiquedev.userservice.usecases.domain.NotEnoughNumbersError if there is just one number left
+    */
   def deleteNumberFromUser(
       userId: UserId,
       numberId: NumberId

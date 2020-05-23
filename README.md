@@ -1,4 +1,8 @@
-# User Service
+# User Service API
+
+## API Specification
+
+You can find the *OpenAPI* specification [here](openapi.yaml).
 
 ## Local run
 
