@@ -5,5 +5,7 @@ import io.circe.generic.auto._
 final case class MailWithId(id: MailId, mail: Mail)
 
 object MailWithId {
-  implicit val mailWithIdSetJsonCoder = jsonCoderOf[Set[MailWithId]]
+  type MailsWithId = Set[MailWithId]
+
+  implicit val mailWithIdSetJsonCoder = jsonCoderOf[MailsWithId]
 }

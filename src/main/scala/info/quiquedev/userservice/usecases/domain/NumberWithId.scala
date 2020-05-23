@@ -5,5 +5,7 @@ import io.circe.generic.auto._
 final case class NumberWithId(id: NumberId, number: Number)
 
 object NumberWithId {
-  implicit val numberWithIdSetJsonCoder = jsonCoderOf[Set[NumberWithId]]
+  type NumbersWithId = Set[NumberWithId]
+
+  implicit val numbersWithIdSetJsonCoder = jsonCoderOf[NumbersWithId]
 }

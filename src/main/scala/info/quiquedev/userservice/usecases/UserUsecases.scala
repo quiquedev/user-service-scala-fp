@@ -78,6 +78,9 @@ object UserUsecases {
 
   def impl[F[_]: Async](implicit xa: Transactor[F]): UserUsecases[F] =
     new UserUsecases[F] {
+      import MailWithId._
+      import NumberWithId._
+
       val CAE = ApplicativeError[ConnectionIO, Throwable]
 
       def createUser(newUser: NewUser): F[User] = {
@@ -131,7 +134,7 @@ object UserUsecases {
           .transact(xa)
 
       def addMailToUser(userId: UserId, mail: Mail): F[User] = {
-        def addMail(mails: Set[MailWithId]): ConnectionIO[Set[MailWithId]] =
+        def addMail(mails: MailsWithId): ConnectionIO[MailsWithId] =
           if (mails.size == MaxMailsPerUser) CAE.raiseError(TooManyMailsError)
           else {
             val mailId = MailId(mails.maxBy(_.id.value).id.value + 1)
@@ -146,10 +149,10 @@ object UserUsecases {
       }
 
       def updateMailFromUser(userId: UserId, mail: MailWithId): F[User] = {
-        def updateMail(mails: Set[MailWithId]): ConnectionIO[Set[MailWithId]] =
+        def updateMail(mails: MailsWithId): ConnectionIO[MailsWithId] =
           mails.find(_.id == mail.id) match {
-            case Some(_) => (mails + mail).pure[ConnectionIO]
-            case None    => CAE.raiseError(MailNotFoundError)
+            case Some(oldMail) => (mails - oldMail + mail).pure[ConnectionIO]
+            case None          => CAE.raiseError(MailNotFoundError)
           }
 
         (for {
@@ -160,11 +163,13 @@ object UserUsecases {
       }
 
       def deleteMailFromUser(userId: UserId, mailId: MailId): F[User] = {
-        def deleteMail(mails: Set[MailWithId]): ConnectionIO[Set[MailWithId]] =
-          mails.find(_.id == mailId) match {
-            case Some(mail) => (mails - mail).pure[ConnectionIO]
-            case None       => CAE.raiseError(MailNotFoundError)
-          }
+        def deleteMail(mails: MailsWithId): ConnectionIO[MailsWithId] =
+          if (mails.size == 1) CAE.raiseError(NotEnoughMailsError)
+          else
+            mails.find(_.id == mailId) match {
+              case Some(mail) => (mails - mail).pure[ConnectionIO]
+              case None       => CAE.raiseError(MailNotFoundError)
+            }
 
         (for {
           mails <- userMails(userId)
@@ -175,8 +180,8 @@ object UserUsecases {
 
       def addNumberToUser(userId: UserId, number: Number): F[User] = {
         def addNumber(
-            numbers: Set[NumberWithId]
-        ): ConnectionIO[Set[NumberWithId]] =
+            numbers: NumbersWithId
+        ): ConnectionIO[NumbersWithId] =
           if (numbers.size == MaxNumbersPerUser)
             CAE.raiseError(TooManyNumbersError)
           else {
@@ -196,8 +201,8 @@ object UserUsecases {
           number: NumberWithId
       ): F[User] = {
         def updateNumber(
-            numbers: Set[NumberWithId]
-        ): ConnectionIO[Set[NumberWithId]] =
+            numbers: NumbersWithId
+        ): ConnectionIO[NumbersWithId] =
           numbers.find(_.id == number.id) match {
             case Some(_) => (numbers + number).pure[ConnectionIO]
             case None    => CAE.raiseError(NumberNotFoundError)
@@ -212,8 +217,8 @@ object UserUsecases {
 
       def deleteNumberFromUser(userId: UserId, numberId: NumberId): F[User] = {
         def deleteNumber(
-            numbers: Set[NumberWithId]
-        ): ConnectionIO[Set[NumberWithId]] =
+            numbers: NumbersWithId
+        ): ConnectionIO[NumbersWithId] =
           numbers.find(_.id == numberId) match {
             case Some(number) => (numbers - number).pure[ConnectionIO]
             case None         => CAE.raiseError(NumberNotFoundError)
@@ -228,7 +233,7 @@ object UserUsecases {
 
       private def updateUserMails(
           userId: UserId,
-          mails: Set[MailWithId]
+          mails: MailsWithId
       ): ConnectionIO[User] =
         sql"""
             update users
@@ -242,19 +247,19 @@ object UserUsecases {
           "phone_numbers"
         )
 
-      private def userMails(userId: UserId): ConnectionIO[Set[MailWithId]] =
+      private def userMails(userId: UserId): ConnectionIO[MailsWithId] =
         sql"""
-          select email
+          select emails
           from users
-           where id = ${userId}
-        """".query[Set[MailWithId]].option.flatMap {
+          where id = $userId
+        """.query[MailsWithId].option.flatMap {
           case None        => CAE.raiseError(UserNotFoundError)
           case Some(mails) => mails.pure[ConnectionIO]
         }
 
       private def updateUserNumbers(
           userId: UserId,
-          numbers: Set[NumberWithId]
+          numbers: NumbersWithId
       ): ConnectionIO[User] =
         sql"""
             update users
@@ -268,12 +273,12 @@ object UserUsecases {
           "phone_numbers"
         )
 
-      private def userNumbers(userId: UserId): ConnectionIO[Set[NumberWithId]] =
+      private def userNumbers(userId: UserId): ConnectionIO[NumbersWithId] =
         sql"""
           select phone_numbers
           from users
-           where id = ${userId}
-        """".query[Set[NumberWithId]].option.flatMap {
+           where id = $userId
+        """.query[NumbersWithId].option.flatMap {
           case None        => CAE.raiseError(UserNotFoundError)
           case Some(mails) => mails.pure[ConnectionIO]
         }
@@ -283,6 +288,5 @@ object UserUsecases {
           from users
           where id = $userId
         """.query[User].option
-
     }
 }

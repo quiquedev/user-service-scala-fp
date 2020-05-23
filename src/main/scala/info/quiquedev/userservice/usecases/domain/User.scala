@@ -1,9 +1,12 @@
 package info.quiquedev.userservice.usecases.domain
 
+import MailWithId._
+import NumberWithId._
+
 final case class User(
     id: UserId,
     lastName: LastName,
     firstName: FirstName,
-    emails: Set[MailWithId],
-    phoneNumbers: Set[NumberWithId]
+    emails: MailsWithId,
+    phoneNumbers: NumbersWithId 
 )

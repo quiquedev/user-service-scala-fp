@@ -31,6 +31,9 @@ import info.quiquedev.userservice.usecases.domain.{
   UserUsecasesError,
   UserNotFoundError
 }
+import info.quiquedev.userservice.usecases.domain.TooManyMailsError
+import info.quiquedev.userservice.usecases.domain.MailNotFoundError
+import info.quiquedev.userservice.usecases.domain.NotEnoughMailsError
 
 class UserUsecasesSpec
     extends AnyWordSpec
@@ -222,6 +225,203 @@ class UserUsecasesSpec
         an[UserNotFoundError.type] shouldBe thrownBy(
           usecases.deleteUserById(unexistingUserId).unsafeRunSync()
         )
+      }
+    }
+
+    "provide with a addMailToUser method to add a mail to user" which {
+      "returns the updated user" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newMail = Mail("enrique@yahoo.com")
+
+        // when
+        val result = usecases.addMailToUser(user.id, newMail).unsafeRunSync()
+
+        // then
+        val expectedUpdatedUser =
+          user.copy(emails = user.emails + MailWithId(MailId(1), newMail))
+
+        result should be(expectedUpdatedUser)
+        findUserInDb(user.id).value should be(expectedUpdatedUser)
+      }
+
+      "fails if the user does not exist" in {
+        // given
+        val nonExistingUserId = UserId(1)
+        val newMail = Mail("enrique@yahoo.com")
+
+        // then
+        an[UserNotFoundError.type] should be thrownBy usecases
+          .addMailToUser(nonExistingUserId, newMail)
+          .unsafeRunSync()
+      }
+
+      "fails if the user has already too many mails" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            (1 until 10).map(i => Mail(s"mail$i@gmail.com")).toSet,
+            Set(Number("55555"))
+          )
+        )
+
+        val newMail = Mail("enrique@yahoo.com")
+
+        // when
+        val result = usecases.addMailToUser(user.id, newMail).unsafeRunSync()
+
+        // then
+        an[TooManyMailsError.type] should be thrownBy usecases
+          .addMailToUser(user.id, newMail)
+          .unsafeRunSync()
+      }
+    }
+
+    "provide with a updateMailFromUser method to update an existing mail of an user" which {
+      "returns the updated user" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newMailWithId =
+          user.emails.head.copy(mail = Mail("enrique@yahoo.com"))
+
+        // when
+        val result =
+          usecases.updateMailFromUser(user.id, newMailWithId).unsafeRunSync()
+
+        // then
+        val expectedUpdatedUser =
+          user.copy(emails = Set(newMailWithId))
+
+        result should be(expectedUpdatedUser)
+        findUserInDb(user.id).value should be(expectedUpdatedUser)
+      }
+
+      "fails if the user does not exist" in {
+        // given
+        val nonExistingUserId = UserId(1)
+        val newMailWithId = MailWithId(MailId(1), Mail("enrique@yahoo.com"))
+
+        // then
+        an[UserNotFoundError.type] should be thrownBy usecases
+          .updateMailFromUser(nonExistingUserId, newMailWithId)
+          .unsafeRunSync()
+      }
+
+      "fails if the mail does not exist" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val newMailWithNonExistingId =
+          MailWithId(MailId(5), Mail("enrique@yahoo.com"))
+
+        // then
+        an[MailNotFoundError.type] should be thrownBy usecases
+          .updateMailFromUser(user.id, newMailWithNonExistingId)
+          .unsafeRunSync()
+
+      }
+    }
+
+    "provide with a deleteMailFromUser method to delete an existing mail from an user" which {
+      "returns the updated user" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@yahoo.com"), Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val mailWithIdToDelete = user.emails.head
+
+        // when
+        val result =
+          usecases
+            .deleteMailFromUser(user.id, mailWithIdToDelete.id)
+            .unsafeRunSync()
+
+        // then
+        val expectedUpdatedUser =
+          user.copy(emails = user.emails - mailWithIdToDelete)
+
+        result should be(expectedUpdatedUser)
+        findUserInDb(user.id).value should be(expectedUpdatedUser)
+      }
+
+      "fails if the user does not exist" in {
+        // given
+        val nonExistingUserId = UserId(1)
+        val mailIdToDelete = MailId(1)
+
+        // then
+        an[UserNotFoundError.type] should be thrownBy usecases
+          .deleteMailFromUser(nonExistingUserId, mailIdToDelete)
+          .unsafeRunSync()
+      }
+
+      "fails if the mail does not exist" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@yahoo.com"), Mail("enrique@gmail.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val mailIdToDelete = MailId(25)
+
+        // then
+        an[MailNotFoundError.type] should be thrownBy usecases
+          .deleteMailFromUser(user.id, mailIdToDelete)
+          .unsafeRunSync()
+      }
+
+      "fails if the user only has one mail left" in {
+        // given
+        val user = insertUserInDb(
+          NewUser(
+            FirstName("enrique"),
+            LastName("molina"),
+            Set(Mail("enrique@yahoo.com")),
+            Set(Number("55555"))
+          )
+        )
+
+        val mailIdToDelete = user.emails.head.id
+
+        // then
+        an[NotEnoughMailsError.type] should be thrownBy usecases
+          .deleteMailFromUser(user.id, mailIdToDelete)
+          .unsafeRunSync()
       }
     }
   }
