@@ -6,26 +6,7 @@ import cats.implicits._
 import doobie._
 import doobie.implicits._
 import info.quiquedev.userservice._
-import info.quiquedev.userservice.usecases.domain.{
-  DbError,
-  FirstName,
-  LastName,
-  Mail,
-  MailId,
-  MailNotFoundError,
-  MailWithId,
-  NewUser,
-  Number,
-  NumberId,
-  NumberWithId,
-  SearchLimit,
-  TooManyMailsError,
-  TooManyNumbersError,
-  User,
-  UserId,
-  UserNotFoundError,
-  _
-}
+import info.quiquedev.userservice.usecases.domain._
 
 trait UserUsecases[F[_]] {
   def createUser(newUser: NewUser): F[User]
@@ -137,7 +118,10 @@ object UserUsecases {
         (for {
           mails <- userMails(userId)
           updatedMails <- addMail(mails)
-          updatedUser <- updateUserMails(userId, updatedMails)
+          updateRequired = mails != updatedMails
+          updatedUser <- if (updateRequired)
+            updateUserMails(userId, updatedMails)
+          else findUserOrFail(userId)
         } yield updatedUser).transact(xa)
       }
 
@@ -188,7 +172,10 @@ object UserUsecases {
         (for {
           numbers <- userNumbers(userId)
           updatedNumbers <- addNumber(numbers)
-          updatedUser <- updateUserNumbers(userId, updatedNumbers)
+          updateRequired = numbers != updatedNumbers
+          updatedUser <- if (updateRequired)
+            updateUserNumbers(userId, updatedNumbers)
+          else findUserOrFail(userId)
         } yield updatedUser).transact(xa)
       }
 
@@ -287,5 +274,12 @@ object UserUsecases {
           from users
           where id = $userId
         """.query[User].option
+
+      private def findUserOrFail(userId: UserId): ConnectionIO[User] =
+        findUser(userId).flatMap {
+          case Some(user) => user.pure[ConnectionIO]
+          case None       => CAE.raiseError(UserNotFoundError)
+        }
+
     }
 }

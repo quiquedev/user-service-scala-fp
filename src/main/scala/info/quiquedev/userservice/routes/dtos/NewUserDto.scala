@@ -10,8 +10,8 @@ import info.quiquedev.userservice.usecases.domain._
 final case class NewUserDto(
     firstName: Option[FirstNameDto],
     lastName: Option[LastNameDto],
-    emails: Option[Set[MailDto]],
-    phoneNumbers: Option[Set[NumberDto]]
+    emails: Option[Set[Option[MailDto]]],
+    phoneNumbers: Option[Set[Option[NumberDto]]]
 )
 
 object NewUserDto {
@@ -31,26 +31,27 @@ object NewUserDto {
       } yield domain
 
     private def validateNullabilityF[F[_]](implicit S: Sync[F]): F[Unit] = {
-      def validateField[A](field: Option[A], name: String): ValidationResult =
+      def validateNotNull[A](field: Option[A], name: String): ValidationResult =
         Validated.condNel(
           field.isDefined,
           (),
           s"$name must be present and not null"
         )
+
       NonEmptyList
         .of(
-          validateField(value.lastName, "lastName"),
-          validateField(value.firstName, "firstName"),
-          validateField(value.emails, "emails"),
-          validateField(value.phoneNumbers, "phoneNumbers")
+          validateNotNull(value.lastName, "lastName"),
+          validateNotNull(value.firstName, "firstName"),
+          validateNotNull(value.emails, "emails"),
+          validateNotNull(value.phoneNumbers, "phoneNumbers")
         )
         .combineAll match {
         case Valid(_) => S.unit
         case Invalid(errors) =>
           S.raiseError(RequestBodyValidationError(errors))
       }
-
     }
+
     private def toValidatedDomainF[F[_]: Sync]: F[NewUser] = {
       val S = Sync[F]
 
@@ -59,15 +60,20 @@ object NewUserDto {
         firstNameDto <- value.firstName
         emailsDto <- value.emails
         phoneNumbersDto <- value.phoneNumbers
-      } yield NewUserDtoRequired(
-        firstNameDto,
-        lastNameDto,
-        emailsDto.filter(_.value.nonNullOrEmpty),
-        phoneNumbersDto.filter(_.value.nonNullOrEmpty)
-      ).pure[F])
-        .getOrElse(
-          S.raiseError(InternalError("nullability check not performed"))
-        )
+      } yield {
+        val nonEmptyMails = emailsDto.toList.flatten.toSet
+        val nonEmptyNumbers = phoneNumbersDto.toList.flatten.toSet
+
+        NewUserDtoRequired(
+          firstNameDto,
+          lastNameDto,
+          nonEmptyMails
+            .filter(_.value.nonNullOrEmpty),
+          nonEmptyNumbers.filter(_.value.nonNullOrEmpty)
+        ).pure[F]
+      }).getOrElse(
+        S.raiseError(InternalError("nullability check not performed"))
+      )
 
       for {
         newUserDtoRequired <- mapToRequired
