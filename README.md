@@ -62,7 +62,7 @@ For testing:
 
 No particular frameworks like [Consumer=Driven Contracts](https://martinfowler.com/articles/consumerDrivenContracts.html) or
 libraries like [Avro Schemas](https://docs.oracle.com/database/nosql-12.1.3.0/GettingStartedGuide/avroschemas.html)
-or [Bean Validation](https://beanvalidation.org/1.0/spec) have been usedto materialize the API and the *DTO*'s requirements.
+or [Bean Validation](https://beanvalidation.org/1.0/spec) have been used to materialize the API and the *DTO*'s requirements.
 
 Specification has been documented with [OpenAPI](https://swagger.io/specification) and *DTO* validation has been done programmatically
 in a clean way by using [Validated](https://typelevel.org/cats/datatypes/validated.html).
