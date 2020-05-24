@@ -58,7 +58,7 @@ For testing:
 * version control
 * json support
 
-#### Code
+## Code
 
 ### [Tagless final](https://scalac.io/tagless-final-pattern-for-scala-code)
 This functional programming pattern is used in production code with the main purpose of abstracting out the *IO* type used.
