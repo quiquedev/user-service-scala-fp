@@ -175,6 +175,12 @@ object UserRoutes {
       import D._
 
       value.recoverWith {
+        case requestBodyParseError @ (_: MalformedMessageBodyFailure |
+            _: InvalidMessageBodyFailure) =>
+          L.error("unhandled error", requestBodyParseError) *> BadRequest(
+            "verify your request body"
+          )
+
         case unhandledError =>
           L.error("unhandled error", unhandledError) *> InternalServerError(
             "something bad happened! please try later or contact our team"

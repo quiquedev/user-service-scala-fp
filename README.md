@@ -7,7 +7,8 @@ You can find it [here](https://editor.swagger.io/?url=https%3A%2F%2Fraw.githubus
 ## Local run
 
 ### Requirements
-You must have `docker` and `docker-compose` installed in your machine.
+
+You must have [docker-compose](https://docs.docker.com/compose/install) installed in your machine.
 
 ### How to
 
