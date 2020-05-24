@@ -29,7 +29,7 @@ The service will be listening on the port `8080`.
 
 #### Libraries
 
-Since there were no specific library requirements requirements I decided to take advantage
+Since there were no specific library requirements I decided to take advantage
 of the benefits of [purely functional programming](https://en.wikipedia.org/wiki/Purely_functional_programming)
 by using the following libraries in production:
 
@@ -48,11 +48,11 @@ For testing:
 
 * [scalatest](https://www.scalatest.org) as testing tool
 * [testcontainers-scala](https://github.com/testcontainers/testcontainers-scala) for dockerized test environments
-* [sbt-scoverate](https://github.com/scoverage/sbt-scoverage) to measure test coverage
+* [sbt-scoverage](https://github.com/scoverage/sbt-scoverage) to measure test coverage
 
 #### Persistence
 
-(PostgreSQL)[https://www.postgresql.org] is the storage type I decided to use so that we could have:
+[PostgreSQL](https://www.postgresql.org) is the storage type I decided to use so that we could have:
 
 * normalized data
 * version control
