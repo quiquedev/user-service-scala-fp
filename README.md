@@ -68,7 +68,7 @@ it easily.
 ### Simplified [Entity-control-boundary](https://en.wikipedia.org/wiki/Entity-control-boundary)
 Each endpoint uses exclusively an [use case](src/main/scala/info/quiquedev/userservice/usecases/UserUsecases.scala) 
 which encapsulate the required business logic.
-The relation *endpoint-use case* is `1:1` with the purpose of introducing orthogonality to totally decouple business use cases.
+The relation *endpoint-use_case* is `1:1` with the purpose of introducing orthogonality to totally decouple business use cases.
 
 ### [Data Transfer Object](https://en.wikipedia.org/wiki/Data_transfer_object)
  
