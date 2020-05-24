@@ -2,7 +2,7 @@
 
 ## API Specification
 
-You can find the *OpenAPI* specification [here](openapi.yaml).
+You can find the *OpenAPI* specification [here](http://editor.swagger.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fquiquedev%2Fuser-service%2Fmaster%2Fopenapi.yaml).
 
 ## Local run
 
@@ -83,8 +83,6 @@ This design allow us to decouple the [service domain](https://en.wikipedia.org/w
 The validation is only performed on `DTO level` since the relation between *DTO* and *data model* is almost `1:1` and there is
 not a complex business logic. Anyways we compensate the lack of *data model* validation an exhaustive *DTO* validation testing
 with a test coverage of 89.07%, having a branch coverage of 100%. For other usecases a validation on both sides would be mandatory.
-
-
 
 
 
