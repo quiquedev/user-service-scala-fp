@@ -1,8 +1,8 @@
 # User Service API
 
-## API Specification
+## API Documentation
 
-You can find the *OpenAPI* specification [here](https://editor.swagger.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fquiquedev%2Fuser-service%2Fmaster%2Fopenapi.yaml).
+You can find it [here](https://editor.swagger.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fquiquedev%2Fuser-service%2Fmaster%2Fopenapi.yaml).
 
 ## Local run
 
@@ -58,6 +58,15 @@ For testing:
 * version control
 * json support
 
+#### API 
+
+No particular frameworks like [Consumer=Driven Contracts](https://martinfowler.com/articles/consumerDrivenContracts.html) or
+libraries like [Avro Schemas](https://docs.oracle.com/database/nosql-12.1.3.0/GettingStartedGuide/avroschemas.html)
+or [Bean Validation](https://beanvalidation.org/1.0/spec) have been usedto materialize the API and the *DTO*'s requirements.
+
+Specification has been documented with [OpenAPI](https://swagger.io/specification) and *DTO* validation has been done programmatically
+in a clean way by using [Validated](https://typelevel.org/cats/datatypes/validated.html).
+
 ## Code
 
 ### [Tagless final](https://scalac.io/tagless-final-pattern-for-scala-code)
@@ -81,8 +90,12 @@ This design allow us to decouple the [service domain](https://en.wikipedia.org/w
 #### DTO and Data Model validation
 
 The validation is only performed on `DTO level` since the relation between *DTO* and *data model* is almost `1:1` and there is
-not a complex business logic. However we compensate the lack of *data model* validation with **exhaustive tests** having
-having a **statement coverage of 89.07%** and a **branch coverage of 100%**.
+not a complex business logic. However we compensate the lack of *data model* validation with **exhaustive DTO validation tests**.
+
+#### Test coverage
+* Statement coverage:  **89.07%** 
+* Branch coverage: **100%**
+
 
 
 
