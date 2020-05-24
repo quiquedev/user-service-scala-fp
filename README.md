@@ -81,7 +81,7 @@ The relation *endpoint-use_case* is `1:1` with the purpose of introducing orthog
 
 ### [Data Transfer Object](https://en.wikipedia.org/wiki/Data_transfer_object)
  
-`DTO` and [model](https://en.wikipedia.org/wiki/Data_model) are completely separated but still keep a almost `1:1` relationship
+*DTO* and [model](https://en.wikipedia.org/wiki/Data_model) are completely separated but still keep a almost `1:1` relationship
 i.e. for the representation of an `User` we have the [DTO](src/main/scala/info/quiquedev/userservice/routes/dtos/UserDto.scala)
 and its corresponding [model](src/main/scala/info/quiquedev/userservice/usecases/model/User.scala).
 
