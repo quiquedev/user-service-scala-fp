@@ -13,7 +13,7 @@ lazy val root = (project in file("."))
   .settings(
     organization := "info.quiquedev",
     name := "user-service",
-    version := "0.0.1-SNAPSHOT",
+    version := "0.0.1",
     scalaVersion := "2.13.2",
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-blaze-server" % Http4sVersion,
