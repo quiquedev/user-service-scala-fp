@@ -81,8 +81,8 @@ This design allow us to decouple the [service domain](https://en.wikipedia.org/w
 #### DTO and Data Model validation
 
 The validation is only performed on `DTO level` since the relation between *DTO* and *data model* is almost `1:1` and there is
-not a complex business logic. Anyways we compensate the lack of *data model* validation an exhaustive *DTO* validation testing
-with a test coverage of 89.07%, having a branch coverage of 100%. For other usecases a validation on both sides would be mandatory.
+not a complex business logic. However we compensate the lack of *data model* validation with an **exhaustive** *DTO* validation testing
+with a **statement coverage of 89.07%** and a **branch coverage of 100%**.
 
 
 
