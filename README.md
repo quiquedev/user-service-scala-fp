@@ -2,7 +2,7 @@
 
 ## API Specification
 
-You can find the *OpenAPI* specification [here](http://editor.swagger.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fquiquedev%2Fuser-service%2Fmaster%2Fopenapi.yaml).
+You can find the *OpenAPI* specification [here](https://editor.swagger.io/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fquiquedev%2Fuser-service%2Fmaster%2Fopenapi.yaml).
 
 ## Local run
 
