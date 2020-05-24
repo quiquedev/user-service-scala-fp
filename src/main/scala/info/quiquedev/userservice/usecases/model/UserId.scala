@@ -1,4 +1,4 @@
-package info.quiquedev.userservice.usecases.domain
+package info.quiquedev.userservice.usecases.model
 
 import doobie.util.{Get, Put}
 

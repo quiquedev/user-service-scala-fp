@@ -15,7 +15,7 @@ import info.quiquedev.userservice.routes.dtos.{
   UsersDto
 }
 import info.quiquedev.userservice.usecases.UserUsecases
-import info.quiquedev.userservice.usecases.domain.{TooManyMailsError, _}
+import info.quiquedev.userservice.usecases.model.{TooManyMailsError, _}
 import io.circe.generic.auto._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -42,7 +42,7 @@ object UserRoutes {
       case req @ POST -> Root / "users" =>
         (for {
           newUserDto <- req.as[NewUserDto]
-          newUser <- newUserDto.toDomainF
+          newUser <- newUserDto.toModelF
           createdUser <- createUser(newUser)
           response <- Created(createdUser.toDto)
         } yield response).recoverWith {
@@ -53,9 +53,9 @@ object UserRoutes {
             lastNameDto
           ) :? SearchLimitMatcher(searchLimitDto) =>
         (for {
-          searchLimit <- SearchLimitDto.toDomainF(searchLimitDto)
-          firstName <- FirstNameDto.toDomainF(firstNameDto)
-          lastName <- LastNameDto.toDomainF(lastNameDto)
+          searchLimit <- SearchLimitDto.toModelF(searchLimitDto)
+          firstName <- FirstNameDto.toModelF(firstNameDto)
+          lastName <- LastNameDto.toModelF(lastNameDto)
           users <- findUsersByName(firstName, lastName, searchLimit)
           response <- Ok(UsersDto(users.map(_.toDto)))
         } yield response).recoverWith {
@@ -78,7 +78,7 @@ object UserRoutes {
       case req @ POST -> Root / "users" / IntVar(userId) / "mails" =>
         (for {
           newMailDto <- req.as[NewMailDto]
-          mail <- newMailDto.toDomainF
+          mail <- newMailDto.toModelF
           updatedUser <- addMailToUser(UserId(userId), mail)
           response <- Created(updatedUser.toDto)
         } yield response).recoverWith {
@@ -92,7 +92,7 @@ object UserRoutes {
           ) =>
         (for {
           newMailDto <- req.as[NewMailDto]
-          mail <- newMailDto.toDomainF
+          mail <- newMailDto.toModelF
           updatedUser <- updateMailFromUser(
             UserId(userId),
             MailWithId(MailId(mailId), Mail(mail.value))
@@ -121,7 +121,7 @@ object UserRoutes {
       case req @ POST -> Root / "users" / IntVar(userId) / "numbers" =>
         (for {
           newNumberDto <- req.as[NewNumberDto]
-          number <- newNumberDto.toDomainF
+          number <- newNumberDto.toModelF
           updatedUser <- addNumberToUser(UserId(userId), number)
           response <- Created(updatedUser.toDto)
         } yield response).recoverWith {
@@ -135,7 +135,7 @@ object UserRoutes {
           ) =>
         (for {
           newNumberDto <- req.as[NewNumberDto]
-          number <- newNumberDto.toDomainF
+          number <- newNumberDto.toModelF
           updatedUser <- updateNumberFromUser(
             UserId(userId),
             NumberWithId(NumberId(numberId), Number(number.value))

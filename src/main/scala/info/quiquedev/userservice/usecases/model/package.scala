@@ -5,7 +5,7 @@ import io.circe._
 import io.circe.parser._
 import org.postgresql.util.PGobject
 
-package object domain {
+package object model {
   def jsonCoderOf[A: Encoder: Decoder]: Meta[A] = {
     val E = Encoder[A]
     val D = Decoder[A]

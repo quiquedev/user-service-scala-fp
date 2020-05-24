@@ -3,7 +3,7 @@ package info.quiquedev.userservice.routes
 import cats.effect.IO
 import cats.implicits._
 import info.quiquedev.userservice.usecases.UserUsecases
-import info.quiquedev.userservice.usecases.domain._
+import info.quiquedev.userservice.usecases.model._
 import io.circe.parser._
 import org.http4s._
 import org.http4s.circe._
@@ -330,7 +330,7 @@ class UserRoutesSpec
       }
 
       "returns 400 if emails is not present" in new TestEnvironment {
-        // given
+        // givetitin
         val requestBody = """
         {
           "firstName": "enrique",

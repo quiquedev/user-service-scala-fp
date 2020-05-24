@@ -5,7 +5,7 @@ import com.dimafeng.testcontainers.{ContainerDef, PostgreSQLContainer}
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import doobie.implicits._
 import doobie.util.transactor.Transactor
-import info.quiquedev.userservice.usecases.domain._
+import info.quiquedev.userservice.usecases.model._
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

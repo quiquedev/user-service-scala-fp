@@ -4,7 +4,7 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated}
 import cats.effect.Sync
 import cats.implicits._
-import info.quiquedev.userservice.usecases.domain.FirstName
+import info.quiquedev.userservice.usecases.model.FirstName
 import io.circe.generic.extras.decoding.UnwrappedDecoder.decodeUnwrapped
 import io.circe.generic.extras.encoding.UnwrappedEncoder.encodeUnwrapped
 import io.circe.{Decoder, Encoder}
@@ -29,7 +29,7 @@ object FirstNameDto {
         )
     }
 
-  def toDomainF[F[_]](
+  def toModelF[F[_]](
       value: FirstNameDto
   )(implicit S: Sync[F]): F[FirstName] =
     validate(value).combineAll match {

@@ -1,6 +1,6 @@
 package info.quiquedev.userservice.routes.dtos
 
-import info.quiquedev.userservice.usecases.domain.User
+import info.quiquedev.userservice.usecases.model.User
 
 final case class UserDto(
     id: UserIdDto,

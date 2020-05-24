@@ -4,13 +4,13 @@ import cats.data.NonEmptyList
 import cats.data.Validated._
 import cats.effect.Sync
 import cats.implicits._
-import info.quiquedev.userservice.usecases.domain.Mail
+import info.quiquedev.userservice.usecases.model.Mail
 final case class NewMailDto(value: Option[MailDto])
 
 object NewMailDto {
   implicit final class newMailDtoExtensions(val value: NewMailDto)
       extends AnyVal {
-    def toDomainF[F[_]](implicit S: Sync[F]): F[Mail] = value.value match {
+    def toModelF[F[_]](implicit S: Sync[F]): F[Mail] = value.value match {
       case None =>
         S.raiseError(
           RequestBodyValidationError(

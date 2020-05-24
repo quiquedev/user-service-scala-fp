@@ -5,7 +5,7 @@ import cats.data.{NonEmptyList, Validated}
 import cats.effect.Sync
 import cats.implicits._
 import info.quiquedev.userservice._
-import info.quiquedev.userservice.usecases.domain._
+import info.quiquedev.userservice.usecases.model._
 
 final case class NewUserDto(
     firstName: Option[FirstNameDto],
@@ -24,11 +24,11 @@ object NewUserDto {
 
   implicit final class NewUserDtoExtensions(val value: NewUserDto)
       extends AnyVal {
-    def toDomainF[F[_]: Sync]: F[NewUser] =
+    def toModelF[F[_]: Sync]: F[NewUser] =
       for {
         _ <- validateNullabilityF
-        domain <- toValidatedDomainF
-      } yield domain
+        model <- toValidatedModelF
+      } yield model
 
     private def validateNullabilityF[F[_]](implicit S: Sync[F]): F[Unit] = {
       def validateNotNull[A](field: Option[A], name: String): ValidationResult =
@@ -52,7 +52,7 @@ object NewUserDto {
       }
     }
 
-    private def toValidatedDomainF[F[_]: Sync]: F[NewUser] = {
+    private def toValidatedModelF[F[_]: Sync]: F[NewUser] = {
       val S = Sync[F]
 
       val mapToRequired: F[NewUserDtoRequired] = (for {

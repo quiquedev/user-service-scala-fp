@@ -4,7 +4,7 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated}
 import cats.effect.Sync
 import cats.implicits._
-import info.quiquedev.userservice.usecases.domain.SearchLimit
+import info.quiquedev.userservice.usecases.model.SearchLimit
 
 final case class SearchLimitDto(value: Int) extends AnyVal
 
@@ -18,7 +18,7 @@ object SearchLimitDto {
       )
     )
 
-  def toDomainF[F[_]](
+  def toModelF[F[_]](
       value: Option[SearchLimitDto]
   )(implicit S: Sync[F]): F[SearchLimit] = value match {
     case None => SearchLimit(DefaultSearchLimit).pure[F]

@@ -1,4 +1,4 @@
-package info.quiquedev.userservice.usecases.domain
+package info.quiquedev.userservice.usecases.model
 
 import io.circe.generic.extras.decoding.UnwrappedDecoder.decodeUnwrapped
 import io.circe.generic.extras.encoding.UnwrappedEncoder.encodeUnwrapped
