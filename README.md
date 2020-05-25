@@ -78,11 +78,13 @@ but with the same attributes.
 ## Code
 
 ### [Tagless final](https://scalac.io/tagless-final-pattern-for-scala-code)
+
 This functional programming pattern is used in production code with the main purpose of abstracting out the *IO* type used.
 The effect type is specified [only in one place](src/main/scala/info/quiquedev/userservice/Main.scala) so that we can change
 it easily.
 
 ### Simplified [Entity-control-boundary](https://en.wikipedia.org/wiki/Entity-control-boundary)
+
 Each endpoint uses exclusively an [use case](src/main/scala/info/quiquedev/userservice/usecases/UserUsecases.scala) 
 which encapsulate the required business logic.
 The relation *endpoint-use_case* is `1:1` with the purpose of introducing orthogonality to totally decouple business use cases.
