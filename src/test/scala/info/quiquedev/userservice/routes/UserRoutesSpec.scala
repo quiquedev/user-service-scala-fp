@@ -405,12 +405,13 @@ class UserRoutesSpec
 
       "returns 400 if emails is too big" in new TestEnvironment {
         // given
+        val mails = (0 to 11).map(i => s""""enrique$i@gmail.com"""").mkString("[", ",", "]")
         val requestBody =
-          """
+          s"""
         {
           "firstName": "enrique",
           "lastName": "molina",
-          "emails": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+          "emails": $mails,
           "phoneNumbers": ["12345"]
         }
         """
@@ -495,7 +496,7 @@ class UserRoutesSpec
         {
           "firstName": "enrique",
           "lastName": "molina",
-          "emails": ["1"],
+          "emails": ["enrique@gmail.com"],
           "phoneNumbers": null
         }
         """
@@ -524,7 +525,7 @@ class UserRoutesSpec
         {
           "firstName": "enrique",
           "lastName": "molina",
-          "emails": ["1"],
+          "emails": ["enrique@gmail.com"],
           "phoneNumbers": []
         }
         """
@@ -550,7 +551,7 @@ class UserRoutesSpec
         {
           "firstName": "enrique",
           "lastName": "molina",
-          "emails": ["1"],
+          "emails": ["enrique@gmail.com"],
           "phoneNumbers": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]
         }
         """
@@ -582,7 +583,7 @@ class UserRoutesSpec
           {
             "firstName": "enrique",
             "lastName": "molina",
-            "emails": ["1"],
+            "emails": ["enrique@gmail.com"],
             "phoneNumbers": ["$longNumber"]
           }
           """
@@ -610,7 +611,7 @@ class UserRoutesSpec
         val requestBody =
           s"""
           {
-            "emails": ["1"],
+            "emails": ["enrique@gmail.com"],
             "phoneNumbers": ["1"]
           }
           """
@@ -677,14 +678,14 @@ class UserRoutesSpec
               "id": 1,
               "lastName": "molina",
               "firstName": "enrique",
-              "emails": [{"id": 1, "mail": "1"}],
+              "emails": [{"id": 1, "mail": "enrique@gmail.com"}],
               "phoneNumbers": [{"id": 1, "number": "1"}]
             },
             {
               "id": 2,
               "lastName": "molina",
               "firstName": "enrique",
-              "emails": [{"id": 1, "mail": "2"}],
+              "emails": [{"id": 1, "mail": "enrique@gmail.com"}],
               "phoneNumbers": [{"id": 1, "number": "6"}]
             }
           ]

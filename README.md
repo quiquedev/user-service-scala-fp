@@ -30,8 +30,7 @@ The service will be listening on the port `8080`.
 
 #### Libraries
 
-Since there were no specific library requirements I decided to take advantage
-of the benefits of [purely functional programming](https://en.wikipedia.org/wiki/Purely_functional_programming)
+I decided to take advantage of the benefits of [purely functional programming](https://en.wikipedia.org/wiki/Purely_functional_programming)
 by using the following libraries in production:
 
 * [cats](https://typelevel.org/cats) as the main functional programming library
@@ -66,7 +65,12 @@ libraries like [Avro Schemas](https://docs.oracle.com/database/nosql-12.1.3.0/Ge
 or [Bean Validation](https://beanvalidation.org/1.0/spec) have been used to materialize the API and the *DTO*'s requirements.
 
 Specification has been documented with [OpenAPI](https://swagger.io/specification) and *DTO* validation has been done programmatically
-in a clean way by using [Validated](https://typelevel.org/cats/datatypes/validated.html).
+in an elegant way by using [Validated](https://typelevel.org/cats/datatypes/validated.html).
+
+Size constraints, i.e.: maximum number of characters of *lastName* have been introduced, in order to avoid to the possibility of
+blowing up the service and the persistence engine. No constraints in terms of format have been used on *mail* and *number*
+but could be easily introduced. The configuration of this constraints, i.e.: maximum size of 5, have been written programmatically 
+in the code for simplicity.
 
 ## Code
 
