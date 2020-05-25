@@ -30,7 +30,7 @@ The service will be listening on the port `8080`.
 
 #### Libraries
 
-I decided to take advantage of the benefits of [purely functional programming](https://en.wikipedia.org/wiki/Purely_functional_programming)
+Implementation takes advantage of the benefits of [purely functional programming](https://en.wikipedia.org/wiki/Purely_functional_programming)
 by using the following libraries in production:
 
 * [cats](https://typelevel.org/cats) as the main functional programming library
