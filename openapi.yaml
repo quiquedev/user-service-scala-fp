@@ -138,7 +138,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Mail'
+              $ref: '#/components/schemas/MailModification'
       responses:
         '200':
           description: mail has been modified
@@ -203,6 +203,8 @@ paths:
           description: number has been added
         '400':
           description: request validation error. check response for details.
+        '404':
+          description: user not found
 
   /users/{userId}/numbers/{numberId}:
     put:
@@ -223,7 +225,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Number'
+              $ref: '#/components/schemas/NumberModification'
       responses:
         '200':
           description: number has been modified
