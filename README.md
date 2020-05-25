@@ -10,7 +10,7 @@ You can find it [here](https://editor.swagger.io/?url=https%3A%2F%2Fraw.githubus
 
 You must have [docker-compose](https://docs.docker.com/compose/install) installed in your machine.
 
-### How to
+### How To
 
 ```
 git clone git@github.com:quiquedev/user-service.git
@@ -20,7 +20,7 @@ docker-compose up --build
 
 The service will be listening on the port `8080`.
 
-## Considerations
+## About
 
 ### Technologies
 
@@ -92,12 +92,12 @@ and its corresponding [model](src/main/scala/info/quiquedev/userservice/usecases
 
 This design allow us to decouple the [service domain](https://en.wikipedia.org/wiki/Domain-driven_design) from the data model.
 
-### DTO and Data Model validation
+### DTO And Data Model Validation
 
 The validation is only performed on `DTO level` since the relation between *DTO* and *data model* is almost `1:1` and there is
 not a complex business logic. However we compensate the lack of *data model* validation with **exhaustive DTO validation tests**.
 
-## Test coverage
+## Test Coverage
 * Statement coverage:  **89.07%** 
 * Branch coverage: **100%**
 
