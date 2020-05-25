@@ -60,7 +60,7 @@ For testing:
 
 #### API 
 
-No particular frameworks like [Consumer-Driven Contracts](https://martinfowler.com/articles/consumerDrivenContracts.html) or
+Neither frameworks like [Consumer-Driven Contracts](https://martinfowler.com/articles/consumerDrivenContracts.html) nor
 libraries like [Avro Schemas](https://docs.oracle.com/database/nosql-12.1.3.0/GettingStartedGuide/avroschemas.html)
 or [Bean Validation](https://beanvalidation.org/1.0/spec) have been used to materialize the API and the *DTO*'s requirements.
 
