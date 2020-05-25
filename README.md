@@ -101,8 +101,22 @@ The validation is only performed on `DTO level` since the relation between *DTO*
 not a complex business logic. However we compensate the lack of *data model* validation with **exhaustive DTO validation tests**.
 
 ## Test Coverage
-* Statement coverage:  **89.07%** 
-* Branch coverage: **100%**
+
+### How To
+
+In addition to `docker` you also need to have [sbt](https://www.scala-sbt.org/1.x/docs/Setup.html) installed.
+
+Run the following command in the project root:
+
+```
+sbt clean coverage test coverageReport
+```
+
+
+### Current Coverage
+
+* [Statement coverage](https://www.zyxware.com/articles/4161/what-is-statement-coverage-in-testing):  **89.07%** 
+* [Branch coverage](https://www.cs.odu.edu/~cs252/Book/branchcov.html): **100%**
 
 
 
