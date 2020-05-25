@@ -67,9 +67,9 @@ or [Bean Validation](https://beanvalidation.org/1.0/spec) have been used to mate
 Specification has been documented with [OpenAPI](https://swagger.io/specification) and validation has been done programmatically
 in an elegant way by using [Validated](https://typelevel.org/cats/datatypes/validated.html).
 
-Size constraints, i.e.: maximum number of characters of *lastName* have been introduced, in order to avoid to the possibility of
+Size constraints, i.e.: maximum number of characters of *lastName*, have been introduced, in order to avoid to the possibility of
 blowing up the service and the persistence engine. No constraints in terms of format have been used on *mail* and *number*
-but could be easily introduced. The configuration of this constraints, i.e.: maximum size of 5, have been written programmatically 
+but could be easily introduced. The configuration of these constraints, i.e.: maximum size of 5, have been written programmatically 
 in the code for simplicity.
 
 ## Code
@@ -92,12 +92,12 @@ and its corresponding [model](src/main/scala/info/quiquedev/userservice/usecases
 
 This design allow us to decouple the [service domain](https://en.wikipedia.org/wiki/Domain-driven_design) from the data model.
 
-#### DTO and Data Model validation
+### DTO and Data Model validation
 
 The validation is only performed on `DTO level` since the relation between *DTO* and *data model* is almost `1:1` and there is
 not a complex business logic. However we compensate the lack of *data model* validation with **exhaustive DTO validation tests**.
 
-#### Test coverage
+## Test coverage
 * Statement coverage:  **89.07%** 
 * Branch coverage: **100%**
 
