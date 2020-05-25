@@ -644,14 +644,14 @@ class UserRoutesSpec
             UserId(1),
             LastName("molina"),
             FirstName("enrique"),
-            Set(MailWithId(MailId(1), Mail("1"))),
+            Set(MailWithId(MailId(1), Mail("enrique@gmail.com"))),
             Set(NumberWithId(NumberId(1), Number("1")))
           ),
           User(
             UserId(2),
             LastName("molina"),
             FirstName("enrique"),
-            Set(MailWithId(MailId(1), Mail("2"))),
+            Set(MailWithId(MailId(1), Mail("enrique@gmail.com"))),
             Set(NumberWithId(NumberId(1), Number("6")))
           )
         )

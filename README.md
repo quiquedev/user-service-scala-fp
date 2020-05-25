@@ -72,6 +72,9 @@ blowing up the service and the persistence engine. No constraints in terms of fo
 but could be easily introduced. The configuration of these constraints, i.e.: maximum size of 5, have been written programmatically 
 in the code for simplicity.
 
+For simplicity no uniqueness constraints for users have been used. Therefore there can be two different users with different user id
+but with the same attributes.
+
 ## Code
 
 ### [Tagless final](https://scalac.io/tagless-final-pattern-for-scala-code)
@@ -86,9 +89,9 @@ The relation *endpoint-use_case* is `1:1` with the purpose of introducing orthog
 
 ### [Data Transfer Object](https://en.wikipedia.org/wiki/Data_transfer_object)
  
-*DTO* and [model](https://en.wikipedia.org/wiki/Data_model) are completely separated but still keep a almost `1:1` relationship
+*DTO* and [data model](https://en.wikipedia.org/wiki/Data_model) are completely separated but still keep an almost `1:1` relationship,
 i.e. for the representation of an `User` we have the [DTO](src/main/scala/info/quiquedev/userservice/routes/dtos/UserDto.scala)
-and its corresponding [model](src/main/scala/info/quiquedev/userservice/usecases/model/User.scala).
+and its corresponding [data model](src/main/scala/info/quiquedev/userservice/usecases/model/User.scala).
 
 This design allow us to decouple the [service domain](https://en.wikipedia.org/wiki/Domain-driven_design) from the data model.
 
