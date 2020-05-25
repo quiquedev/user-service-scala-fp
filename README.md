@@ -75,6 +75,9 @@ in the code for simplicity.
 For simplicity no uniqueness constraints for users have been used. Therefore there can be two different users with different user id
 but with the same attributes.
 
+The fields `emails` and `phoneNumbers` of the data object `User` are `List` but since collections in `json` are represented with `array`
+`Set`s are used internally in order to guarantee uniqueness.
+
 ## Code
 
 ### [Tagless final](https://scalac.io/tagless-final-pattern-for-scala-code)
