@@ -64,7 +64,7 @@ Neither frameworks like [Consumer-Driven Contracts](https://martinfowler.com/art
 libraries like [Avro Schemas](https://docs.oracle.com/database/nosql-12.1.3.0/GettingStartedGuide/avroschemas.html)
 or [Bean Validation](https://beanvalidation.org/1.0/spec) have been used to materialize the API and the *DTO*'s requirements.
 
-Specification has been documented with [OpenAPI](https://swagger.io/specification) and *DTO* validation has been done programmatically
+Specification has been documented with [OpenAPI](https://swagger.io/specification) and validation has been done programmatically
 in an elegant way by using [Validated](https://typelevel.org/cats/datatypes/validated.html).
 
 Size constraints, i.e.: maximum number of characters of *lastName* have been introduced, in order to avoid to the possibility of
